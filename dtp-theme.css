@@ -1,0 +1,785 @@
+/**
+ * DTP-STYLE THEME
+ * Dark theme with green accents matching the DTP website
+ */
+
+/* Override root colors with DTP theme */
+:root {
+    --dtp-primary: #00ff88;
+    --dtp-secondary: #00cc6f;
+    --dtp-dark: #0a0e1a;
+    --dtp-dark-light: #151b2d;
+    --dtp-card-bg: #1a2235;
+    --dtp-text: #e4e6eb;
+    --dtp-text-dim: #8b92a7;
+    --dtp-success: #00ff88;
+    --dtp-danger: #ff4757;
+    --dtp-warning: #ffa502;
+    --dtp-info: #3742fa;
+}
+
+/* Dark background */
+body {
+    background: linear-gradient(135deg, #0a0e1a 0%, #151b2d 50%, #0a0e1a 100%);
+    background-attachment: fixed;
+    color: var(--dtp-text);
+}
+
+/* Header dark theme */
+.header {
+    background: rgba(10, 14, 26, 0.95);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0, 255, 136, 0.1);
+}
+
+.logo h1 {
+    background: linear-gradient(135deg, var(--dtp-primary), var(--dtp-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.status-dot.open {
+    background: var(--dtp-success);
+    box-shadow: 0 0 10px var(--dtp-success);
+}
+
+.last-updated {
+    color: #a0a8c0;
+    font-weight: 500;
+}
+
+/* Tab navigation dark */
+.tab-navigation {
+    background: rgba(26, 34, 53, 0.95);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0, 255, 136, 0.1);
+}
+
+.tab-btn {
+    background: transparent;
+    color: var(--dtp-text-dim);
+    border-bottom: 3px solid transparent;
+}
+
+.tab-btn:hover {
+    background: rgba(0, 255, 136, 0.05);
+    color: var(--dtp-primary);
+}
+
+.tab-btn.active {
+    color: var(--dtp-primary);
+    border-bottom-color: var(--dtp-primary);
+    background: rgba(0, 255, 136, 0.1);
+}
+
+/* iOS cards dark theme */
+.ios-card, .card {
+    background: rgba(26, 34, 53, 0.9);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 255, 136, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.ios-card:hover, .card:hover {
+    border-color: rgba(0, 255, 136, 0.3);
+    box-shadow: 0 12px 40px rgba(0, 255, 136, 0.15);
+}
+
+.ios-card h3, .card h3 {
+    color: #ffffff;
+    font-weight: 700;
+}
+
+/* Hot picks summary with DTP green */
+.hot-picks-summary {
+    background: linear-gradient(135deg, 
+        rgba(0, 255, 136, 0.2) 0%, 
+        rgba(0, 204, 111, 0.2) 100%);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+}
+
+/* Page headers */
+.page-header h2 {
+    color: #ffffff;
+    font-weight: 800;
+}
+
+.page-header p {
+    color: #a0a8c0;
+    font-weight: 500;
+}
+
+/* Buttons */
+.btn-primary, .action-btn.primary {
+    background: linear-gradient(135deg, var(--dtp-primary), var(--dtp-secondary));
+    color: var(--dtp-dark);
+    font-weight: 700;
+}
+
+.btn-primary:hover, .action-btn.primary:hover {
+    box-shadow: 0 4px 20px rgba(0, 255, 136, 0.4);
+    transform: translateY(-2px);
+}
+
+.refresh-btn {
+    background: rgba(0, 255, 136, 0.1);
+    color: var(--dtp-primary);
+}
+
+.refresh-btn:hover {
+    background: rgba(0, 255, 136, 0.2);
+}
+
+/* Hot pick cards */
+.hot-pick-card {
+    background: linear-gradient(135deg, 
+        rgba(26, 34, 53, 0.95) 0%, 
+        rgba(21, 27, 45, 0.95) 100%);
+    border: 1px solid rgba(0, 255, 136, 0.15);
+}
+
+.hot-pick-card:hover {
+    border-color: var(--dtp-primary);
+    box-shadow: 0 12px 32px rgba(0, 255, 136, 0.2);
+}
+
+.rank-badge {
+    background: linear-gradient(135deg, var(--dtp-primary), var(--dtp-secondary));
+    color: var(--dtp-dark);
+}
+
+.hot-pick-symbol {
+    color: var(--dtp-primary);
+}
+
+.hot-pick-type {
+    color: #a0a8c0;
+}
+
+/* Score circle with green */
+.score-circle {
+    background: conic-gradient(
+        var(--dtp-primary) 0deg,
+        var(--dtp-primary) calc(var(--score) * 3.6deg),
+        rgba(0, 255, 136, 0.1) calc(var(--score) * 3.6deg),
+        rgba(0, 255, 136, 0.1) 360deg
+    );
+    color: #ffffff;
+    font-weight: 800;
+}
+
+.score-circle::before {
+    background: var(--dtp-card-bg);
+}
+
+/* Detail items */
+.detail-item {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.detail-icon {
+    background: var(--dtp-primary);
+    color: var(--dtp-dark);
+}
+
+.detail-label {
+    color: #a0a8c0;
+    font-weight: 500;
+}
+
+.detail-value {
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.detail-value.positive {
+    color: var(--dtp-success);
+}
+
+.detail-value.negative {
+    color: var(--dtp-danger);
+}
+
+/* Reason badges */
+.reason-badge {
+    background: rgba(0, 255, 136, 0.15);
+    color: var(--dtp-primary);
+}
+
+/* Metrics */
+.metric-card {
+    background: rgba(26, 34, 53, 0.9);
+    border: 1px solid rgba(0, 255, 136, 0.1);
+}
+
+.metric-value {
+    color: #ffffff;
+    font-weight: 800;
+}
+
+.metric-value.positive {
+    color: var(--dtp-success);
+}
+
+.metric-value.negative {
+    color: var(--dtp-danger);
+}
+
+/* Tables */
+.data-table {
+    background: rgba(26, 34, 53, 0.5);
+}
+
+.data-table thead {
+    background: rgba(0, 255, 136, 0.1);
+}
+
+.data-table th {
+    color: var(--dtp-primary);
+    border-bottom: 2px solid rgba(0, 255, 136, 0.3);
+}
+
+.data-table td {
+    color: #ffffff;
+    border-bottom: 1px solid rgba(0, 255, 136, 0.05);
+    font-weight: 500;
+}
+
+.data-table tbody tr:hover {
+    background: rgba(0, 255, 136, 0.05);
+}
+
+/* Badges */
+.badge.call {
+    background: rgba(0, 255, 136, 0.2);
+    color: var(--dtp-success);
+}
+
+.badge.put {
+    background: rgba(255, 71, 87, 0.2);
+    color: var(--dtp-danger);
+}
+
+/* Inputs */
+input, select, textarea {
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(0, 255, 136, 0.2);
+    color: #ffffff;
+    font-weight: 500;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: var(--dtp-primary);
+    box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.1);
+}
+
+input::placeholder {
+    color: #8b92a7;
+    opacity: 1;
+}
+
+/* Ticker Search Specific Styles */
+.ticker-search-box {
+    background: linear-gradient(135deg, 
+        rgba(0, 255, 136, 0.05) 0%, 
+        rgba(0, 204, 111, 0.05) 100%);
+    border: 2px solid rgba(0, 255, 136, 0.2);
+}
+
+.search-container {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.ticker-input {
+    flex: 1;
+    padding: 16px 20px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 2px solid rgba(0, 255, 136, 0.3);
+    color: var(--dtp-primary);
+}
+
+.ticker-input:focus {
+    border-color: var(--dtp-primary);
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+}
+
+.search-btn {
+    padding: 16px 32px;
+    background: linear-gradient(135deg, var(--dtp-primary), var(--dtp-secondary));
+    color: var(--dtp-dark);
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.search-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(0, 255, 136, 0.4);
+}
+
+.search-hints {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.search-hints strong {
+    color: var(--dtp-text-dim);
+    font-size: 0.875rem;
+}
+
+.hint-btn {
+    padding: 6px 12px;
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid rgba(0, 255, 136, 0.2);
+    border-radius: 6px;
+    color: var(--dtp-primary);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.hint-btn:hover {
+    background: rgba(0, 255, 136, 0.2);
+    transform: scale(1.05);
+}
+
+/* Data Source Info */
+.data-source-info {
+    background: rgba(26, 34, 53, 0.9);
+    border-left: 4px solid var(--dtp-primary);
+}
+
+.info-text {
+    color: var(--dtp-text-dim);
+    margin-bottom: 12px;
+}
+
+.info-text strong {
+    color: #ffffff;
+    font-weight: 700;
+}
+
+#dataSourceStatus {
+    color: var(--dtp-warning);
+    font-weight: 600;
+}
+
+.api-config {
+    display: grid;
+    grid-template-columns: 1fr 2fr auto;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.api-select, .api-input {
+    padding: 12px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 255, 136, 0.2);
+    color: #ffffff;
+    font-weight: 500;
+}
+
+.api-help {
+    margin-top: 16px;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    border-left: 3px solid var(--dtp-primary);
+}
+
+.api-help summary {
+    color: var(--dtp-primary);
+    cursor: pointer;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.api-help ul {
+    list-style: none;
+    padding: 0;
+}
+
+.api-help li {
+    padding: 8px 0;
+    color: var(--dtp-text-dim);
+}
+
+.api-help a {
+    color: var(--dtp-primary);
+    text-decoration: none;
+}
+
+.api-help a:hover {
+    text-decoration: underline;
+}
+
+/* Empty state */
+.empty-state-ticker {
+    text-align: center;
+    padding: 80px 20px;
+}
+
+.empty-state-ticker i {
+    font-size: 4rem;
+    color: rgba(0, 255, 136, 0.3);
+    margin-bottom: 24px;
+}
+
+.empty-state-ticker h3 {
+    color: #ffffff;
+    font-size: 1.5rem;
+    margin-bottom: 12px;
+    font-weight: 700;
+}
+
+.empty-state-ticker p {
+    color: #a0a8c0;
+    font-weight: 500;
+}
+
+/* Analysis results */
+.analysis-complete {
+    animation: slideIn 0.5s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.analysis-section {
+    background: rgba(26, 34, 53, 0.5);
+    padding: 24px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(0, 255, 136, 0.1);
+}
+
+.analysis-section h3 {
+    color: var(--dtp-primary);
+    margin-bottom: 20px;
+    font-weight: 700;
+}
+
+.data-source {
+    color: var(--dtp-text-dim);
+    font-size: 0.875rem;
+    margin-bottom: 20px;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.metric {
+    text-align: center;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+}
+
+.metric .label {
+    display: block;
+    color: #a0a8c0;
+    font-size: 0.875rem;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.metric .value {
+    display: block;
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.recommendation {
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    border-left: 4px solid;
+}
+
+.recommendation.bullish {
+    background: rgba(0, 255, 136, 0.1);
+    border-color: var(--dtp-success);
+}
+
+.recommendation.bearish {
+    background: rgba(255, 71, 87, 0.1);
+    border-color: var(--dtp-danger);
+}
+
+.recommendation.sell, .recommendation.buy {
+    background: rgba(255, 165, 2, 0.1);
+    border-color: var(--dtp-warning);
+}
+
+.recommendation .confidence {
+    float: right;
+    padding: 4px 12px;
+    border-radius: 12px;
+    background: rgba(0, 255, 136, 0.2);
+    color: var(--dtp-primary);
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+/* Footer */
+.footer {
+    background: rgba(10, 14, 26, 0.95);
+    border-top: 1px solid rgba(0, 255, 136, 0.1);
+}
+
+.disclaimer {
+    background: rgba(255, 71, 87, 0.1);
+    border: 2px solid rgba(255, 71, 87, 0.3);
+}
+
+.disclaimer h4 {
+    color: var(--dtp-danger);
+}
+
+.disclaimer p {
+    color: #c0c5d6;
+    font-weight: 500;
+}
+
+.footer-links {
+    color: #a0a8c0;
+    font-weight: 500;
+}
+
+.footer-links a {
+    color: var(--dtp-primary);
+}
+
+/* Loading spinner */
+.spinner-ios {
+    border-color: rgba(0, 255, 136, 0.15);
+    border-top-color: var(--dtp-primary);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+    background: var(--dtp-dark);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 136, 0.3);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 255, 136, 0.5);
+}
+
+/* ===== ADDITIONAL CONTRAST IMPROVEMENTS ===== */
+/* Ensure all card titles and headings are bright white */
+.hot-pick-card h4,
+.hot-pick-card .contract-name,
+.card h3, .card h4,
+.ios-card h3, .ios-card h4,
+.hot-picks-summary h3,
+.summary-metric h4 {
+    color: #ffffff !important;
+    font-weight: 700;
+}
+
+/* Ensure all secondary text is clearly visible */
+.hot-pick-card .strike,
+.hot-pick-card .expiry,
+.hot-picks-summary p,
+.summary-metric p,
+.stat-label,
+.label {
+    color: #a0a8c0 !important;
+    font-weight: 500;
+}
+
+/* Ensure all values and numbers are bright white */
+.stat-value,
+.value,
+.price,
+.metric-number {
+    color: #ffffff !important;
+    font-weight: 700;
+}
+
+/* Loading and empty states */
+.loading-text,
+.empty-state h3 {
+    color: #ffffff !important;
+}
+
+.empty-state p {
+    color: #a0a8c0 !important;
+}
+
+/* Table cells - ensure text is visible */
+.data-table tbody tr td {
+    color: #ffffff !important;
+}
+
+.data-table tbody tr td.dim {
+    color: #a0a8c0 !important;
+}
+
+/* Form labels */
+label {
+    color: #a0a8c0 !important;
+    font-weight: 500;
+}
+
+/* Badge text improvements */
+.badge {
+    font-weight: 600;
+}
+
+/* Button text improvements */
+button {
+    font-weight: 600;
+}
+
+/* ===== SCANNER, SIGNALS, STRATEGIES UNIFIED THEME ===== */
+/* Opportunity cards - dark background with light text */
+.opportunity-card {
+    background: linear-gradient(135deg, 
+        rgba(26, 34, 53, 0.95) 0%, 
+        rgba(21, 27, 45, 0.95) 100%) !important;
+    border-left: 4px solid var(--dtp-primary) !important;
+}
+
+/* SIGNALS TAB - Match Scanner Style */
+.signal-card {
+    background: linear-gradient(135deg, 
+        rgba(26, 34, 53, 0.95) 0%, 
+        rgba(21, 27, 45, 0.95) 100%) !important;
+    border-left: 4px solid var(--dtp-primary) !important;
+}
+
+.signal-item {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid rgba(0, 255, 136, 0.1) !important;
+}
+
+.signal-symbol {
+    color: var(--dtp-primary) !important;
+    font-weight: 800;
+}
+
+.signal-desc {
+    color: #e4e6eb !important;
+    font-weight: 500;
+}
+
+.signal-strength {
+    background: rgba(0, 0, 0, 0.3) !important;
+}
+
+.strength-bar {
+    background: linear-gradient(90deg, var(--dtp-primary), var(--dtp-secondary)) !important;
+}
+
+/* STRATEGIES TAB - Match Scanner Style */
+.strategy-card {
+    background: linear-gradient(135deg, 
+        rgba(26, 34, 53, 0.95) 0%, 
+        rgba(21, 27, 45, 0.95) 100%) !important;
+    border-top: 4px solid var(--dtp-primary) !important;
+    border-left: none !important;
+}
+
+.strategy-card h3 {
+    color: #ffffff !important;
+    font-weight: 700;
+}
+
+.strategy-card p {
+    color: #e4e6eb !important;
+    font-weight: 500;
+}
+
+.strategy-stats .label {
+    color: #a0a8c0 !important;
+    font-weight: 600;
+}
+
+.strategy-stats .value {
+    color: #ffffff !important;
+    font-weight: 700;
+}
+
+.strategy-stats .stat {
+    border-bottom: 1px solid rgba(0, 255, 136, 0.2) !important;
+}
+
+.strategy-badge {
+    background: var(--dtp-primary) !important;
+    color: var(--dtp-dark) !important;
+    font-weight: 700;
+}
+
+.opp-header h4 {
+    color: #ffffff !important;
+    font-weight: 800;
+}
+
+.opp-type {
+    color: var(--dtp-primary) !important;
+    font-weight: 700;
+}
+
+.opp-description {
+    color: #e4e6eb !important;
+    font-weight: 500;
+}
+
+.opp-action {
+    color: #a0a8c0 !important;
+    border-top: 2px solid rgba(0, 255, 136, 0.2) !important;
+    font-weight: 500;
+}
+
+.opp-action strong {
+    color: #ffffff !important;
+    font-weight: 700;
+}
+
+.strength-badge {
+    color: var(--dtp-dark) !important;
+    font-weight: 700;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .api-config {
+        grid-template-columns: 1fr;
+    }
+    
+    .search-container {
+        flex-direction: column;
+    }
+}
