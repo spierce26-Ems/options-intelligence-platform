@@ -6,9 +6,14 @@
 const RealTimeData = {
     // API Configuration
     apis: {
+        polygon: {
+            enabled: true,
+            apiKey: 'ff_73grG5wCUkN1IaYC0jv94GTf_36fq',
+            baseUrl: 'https://api.polygon.io'
+        },
         tradier: {
             enabled: false,
-            apiKey: '', // Set your API key here
+            apiKey: '', // Set your API key here when you get it
             sandbox: true,
             baseUrl: 'https://sandbox.tradier.com/v1'
         },
@@ -17,22 +22,62 @@ const RealTimeData = {
             apiKey: '', // Set your API key here
             baseUrl: 'https://api.tdameritrade.com/v1'
         },
-        polygon: {
-            enabled: false,
-            apiKey: '', // Set your API key here
-            baseUrl: 'https://api.polygon.io/v3'
-        },
         yahoo: {
-            enabled: true, // Free, no key needed
+            enabled: true, // Keep as fallback
             baseUrl: 'https://query1.finance.yahoo.com'
         }
     },
+    
+    // Simple cache for API responses
+    cache: {},
     
     /**
      * Fetch real-time stock price
      */
     async getStockPrice(symbol) {
-        // Try Yahoo Finance first (free, no auth)
+        // Check cache first (60 second cache)
+        const cacheKey = `price_${symbol}`;
+        const cached = this.cache[cacheKey];
+        if (cached && Date.now() - cached.time < 60000) {
+            return cached.data;
+        }
+        
+        // Try Polygon first
+        if (this.apis.polygon.enabled) {
+            try {
+                const url = `${this.apis.polygon.baseUrl}/v2/aggs/ticker/${symbol}/prev?adjusted=true&apiKey=${this.apis.polygon.apiKey}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.results && data.results[0]) {
+                    const result = data.results[0];
+                    const priceData = {
+                        price: result.c, // close price
+                        open: result.o,
+                        high: result.h,
+                        low: result.l,
+                        change: result.c - result.o,
+                        changePercent: ((result.c - result.o) / result.o) * 100,
+                        volume: result.v,
+                        timestamp: Date.now(),
+                        source: 'polygon'
+                    };
+                    
+                    // Cache it
+                    this.cache[cacheKey] = {
+                        data: priceData,
+                        time: Date.now()
+                    };
+                    
+                    console.log(`✅ Polygon: Got ${symbol} price: $${result.c}`);
+                    return priceData;
+                }
+            } catch (error) {
+                console.log('Polygon failed, trying Yahoo:', error.message);
+            }
+        }
+        
+        // Try Yahoo Finance as fallback
         try {
             const response = await fetch(
                 `${this.apis.yahoo.baseUrl}/v8/finance/chart/${symbol}?interval=1d&range=1d`,
@@ -42,7 +87,7 @@ const RealTimeData = {
             
             if (data.chart && data.chart.result && data.chart.result[0]) {
                 const meta = data.chart.result[0].meta;
-                return {
+                const priceData = {
                     price: meta.regularMarketPrice || meta.previousClose,
                     change: meta.regularMarketPrice - meta.previousClose,
                     changePercent: ((meta.regularMarketPrice - meta.previousClose) / meta.previousClose) * 100,
@@ -50,9 +95,18 @@ const RealTimeData = {
                     timestamp: Date.now(),
                     source: 'yahoo'
                 };
+                
+                // Cache it
+                this.cache[cacheKey] = {
+                    data: priceData,
+                    time: Date.now()
+                };
+                
+                console.log(`✅ Yahoo: Got ${symbol} price: $${priceData.price}`);
+                return priceData;
             }
         } catch (error) {
-            console.log('Yahoo Finance failed:', error);
+            console.log('Yahoo Finance failed:', error.message);
         }
         
         // Try Tradier if configured
@@ -69,7 +123,7 @@ const RealTimeData = {
                 
                 if (data.quotes && data.quotes.quote) {
                     const quote = data.quotes.quote;
-                    return {
+                    const priceData = {
                         price: quote.last,
                         change: quote.change,
                         changePercent: quote.change_percentage,
@@ -77,13 +131,22 @@ const RealTimeData = {
                         timestamp: Date.now(),
                         source: 'tradier'
                     };
+                    
+                    // Cache it
+                    this.cache[cacheKey] = {
+                        data: priceData,
+                        time: Date.now()
+                    };
+                    
+                    return priceData;
                 }
             } catch (error) {
-                console.log('Tradier failed:', error);
+                console.log('Tradier failed:', error.message);
             }
         }
         
         // Fallback to simulated data
+        console.log(`⚠️ Using simulated data for ${symbol}`);
         return {
             price: generateSimulatedPrice(symbol),
             change: 0,
@@ -91,7 +154,7 @@ const RealTimeData = {
             volume: 0,
             timestamp: Date.now(),
             source: 'simulated',
-            warning: '⚠️ Using simulated data. Configure API keys for real-time data.'
+            warning: '⚠️ Using simulated data. Real API failed.'
         };
     },
     
@@ -99,6 +162,13 @@ const RealTimeData = {
      * Fetch real options chain
      */
     async getOptionsChain(symbol) {
+        // Check cache first (5 minute cache for options)
+        const cacheKey = `options_${symbol}`;
+        const cached = this.cache[cacheKey];
+        if (cached && Date.now() - cached.time < 300000) {
+            return cached.data;
+        }
+        
         // Try Tradier if configured
         if (this.apis.tradier.enabled) {
             try {
@@ -158,25 +228,42 @@ const RealTimeData = {
                     }
                 }
                 
-                return {
+                const chainData = {
                     options: allOptions,
                     source: 'tradier',
                     timestamp: Date.now()
                 };
                 
+                // Cache it
+                this.cache[cacheKey] = {
+                    data: chainData,
+                    time: Date.now()
+                };
+                
+                return chainData;
+                
             } catch (error) {
-                console.log('Tradier options failed:', error);
+                console.log('Tradier options failed:', error.message);
             }
         }
         
         // Fallback to simulated data
-        const stockPrice = await OptionsData.getStockPrice(symbol);
-        return {
-            options: OptionsData.generateOptionsChain(symbol, stockPrice),
+        console.log(`⚠️ Using simulated options data for ${symbol}`);
+        const stockPrice = await this.getStockPrice(symbol);
+        const chainData = {
+            options: OptionsData.generateOptionsChain(symbol, stockPrice.price),
             source: 'simulated',
             timestamp: Date.now(),
-            warning: '⚠️ Using simulated data. Configure API keys for real-time options data.'
+            warning: '⚠️ Using simulated data. Real API not available.'
         };
+        
+        // Cache it
+        this.cache[cacheKey] = {
+            data: chainData,
+            time: Date.now()
+        };
+        
+        return chainData;
     },
     
     /**
@@ -190,6 +277,7 @@ const RealTimeData = {
             console.log(`✅ ${apiName} API configured`);
             return true;
         }
+        console.log(`❌ Unknown API: ${apiName}`);
         return false;
     },
     
@@ -197,34 +285,81 @@ const RealTimeData = {
      * Test API connection
      */
     async testConnection(apiName) {
-        try {
-            const testSymbol = 'AAPL';
-            const data = await this.getStockPrice(testSymbol);
-            return {
-                success: data.source !== 'simulated',
-                source: data.source,
-                message: data.source === 'simulated' ? 
-                    'Using simulated data - configure API keys' : 
-                    `Connected to ${data.source}`
-            };
-        } catch (error) {
-            return {
-                success: false,
-                error: error.message
-            };
+        console.log(`Testing ${apiName} connection...`);
+        
+        if (apiName === 'polygon') {
+            try {
+                const result = await this.getStockPrice('AAPL');
+                if (result.source === 'polygon') {
+                    console.log('✅ Polygon connection successful!');
+                    console.log('AAPL Price:', result.price);
+                    return true;
+                }
+            } catch (error) {
+                console.log('❌ Polygon connection failed:', error.message);
+                return false;
+            }
         }
+        
+        if (apiName === 'tradier') {
+            try {
+                const result = await this.getStockPrice('AAPL');
+                if (result.source === 'tradier') {
+                    console.log('✅ Tradier connection successful!');
+                    return true;
+                }
+            } catch (error) {
+                console.log('❌ Tradier connection failed:', error.message);
+                return false;
+            }
+        }
+        
+        console.log('❌ API not configured or test failed');
+        return false;
+    },
+    
+    /**
+     * Clear cache
+     */
+    clearCache() {
+        this.cache = {};
+        console.log('✅ Cache cleared');
+    },
+    
+    /**
+     * Get cache stats
+     */
+    getCacheStats() {
+        const keys = Object.keys(this.cache);
+        console.log(`Cache contains ${keys.length} items:`);
+        keys.forEach(key => {
+            const age = Date.now() - this.cache[key].time;
+            console.log(`  ${key}: ${Math.floor(age/1000)}s old`);
+        });
     }
 };
 
-// Make globally available
-window.RealTimeData = RealTimeData;
-
 /**
- * Helper function for simulated prices
+ * Helper function to generate simulated price
  */
 function generateSimulatedPrice(symbol) {
+    // Generate a consistent price based on symbol
     const hash = symbol.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const basePrice = 50 + (hash % 450);
-    const volatility = Math.sin(hash) * 5;
-    return parseFloat((basePrice + volatility).toFixed(2));
+    const basePrice = 50 + (hash % 450); // Price between $50 and $500
+    return basePrice;
+}
+
+// Auto-test connection on load
+if (RealTimeData.apis.polygon.enabled) {
+    console.log('🚀 Polygon API is enabled');
+    console.log('Testing connection...');
+    RealTimeData.testConnection('polygon').then(success => {
+        if (success) {
+            console.log('✅ Ready to fetch real-time data!');
+        } else {
+            console.log('⚠️ Will use fallback data sources');
+        }
+    });
+} else {
+    console.log('⚠️ No real-time API configured. Using simulated data.');
 }
