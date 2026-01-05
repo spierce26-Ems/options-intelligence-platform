@@ -4,84 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Options Trading Intelligence Platform - Institutional-Grade Signals</title>
-    <link rel="stylesheet" href="css/ios-modern.css">
-    <link rel="stylesheet" href="css/enhanced-hotpicks.css">
+    <link rel="stylesheet" href="css/financial-design-system.css">
+    <link rel="stylesheet" href="css/trading-components.css">
     <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
+    <!-- Navigation - Invisible until needed -->
+    <nav class="nav">
         <div class="container">
-            <div class="header-content">
-                <div class="logo">
-                    <i class="fas fa-chart-line"></i>
-                    <h1>Options Intelligence</h1>
+            <div class="nav-inner">
+                <a href="#" class="nav-logo">Options Intelligence</a>
+                <div class="nav-items">
+                    <a href="#hotpicks" class="nav-item active" data-tab="hotpicks">Hot Picks</a>
+                    <a href="#search" class="nav-item" data-tab="ticker-search">Search</a>
+                    <a href="#scanner" class="nav-item" data-tab="scanner">Scanner</a>
+                    <a href="#signals" class="nav-item" data-tab="signals">Signals</a>
+                    <a href="#strategies" class="nav-item" data-tab="strategies">Strategies</a>
+                    <a href="#portfolio" class="nav-item" data-tab="portfolio">Portfolio</a>
                 </div>
-                <div class="header-info">
-                    <div class="market-status" id="marketStatus">
-                        <span class="status-dot"></span>
-                        <span class="status-text">Market Closed</span>
-                    </div>
-                    <div class="last-updated" id="lastUpdated">
-                        Last Updated: --:--
-                    </div>
+                <div class="status-indicator status-neutral" id="marketStatus">
+                    <span class="status-dot"></span>
+                    <span>Market Closed</span>
                 </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Data Source Warning Banner -->
-    <div class="data-source-banner" id="dataSourceBanner" style="display: none;">
-        <div class="container">
-            <div class="banner-content">
-                <i class="fas fa-exclamation-circle"></i>
-                <span id="dataSourceText">Checking data source...</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Alert Banner for Top Signals -->
-    <div class="alert-banner" id="alertBanner" style="display: none;">
-        <div class="container">
-            <div class="alert-content">
-                <i class="fas fa-exclamation-triangle"></i>
-                <span id="alertText"></span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Navigation Tabs -->
-    <nav class="tab-navigation">
-        <div class="container">
-            <div class="tabs">
-                <button class="tab-btn active" data-tab="hotpicks">
-                    <i class="fas fa-fire"></i> Hot Picks
-                </button>
-                <button class="tab-btn" data-tab="ticker-search">
-                    <i class="fas fa-search-dollar"></i> Search Ticker
-                </button>
-                <button class="tab-btn" data-tab="scanner">
-                    <i class="fas fa-search"></i> Scanner
-                </button>
-                <button class="tab-btn" data-tab="signals">
-                    <i class="fas fa-signal"></i> Signals
-                </button>
-                <button class="tab-btn" data-tab="greeks">
-                    <i class="fas fa-calculator"></i> Greeks
-                </button>
-                <button class="tab-btn" data-tab="strategies">
-                    <i class="fas fa-chess"></i> Strategies
-                </button>
-                <button class="tab-btn" data-tab="flow">
-                    <i class="fas fa-water"></i> Flow
-                </button>
-                <button class="tab-btn" data-tab="portfolio">
-                    <i class="fas fa-wallet"></i> Portfolio
-                </button>
             </div>
         </div>
     </nav>
+
+
 
     <!-- Main Content -->
     <main class="main-content">
@@ -870,6 +820,11 @@
     <script src="js/macro-intelligence.js"></script>
     <script src="js/technical-confluence.js"></script>
     <script src="js/master-intelligence.js"></script>
+    
+    <!-- NEW: Corporate Calendar & Intelligent Screening -->
+    <script src="js/corporate-calendar.js"></script>
+    <script src="js/intelligent-screener.js"></script>
+    
     <script src="js/enhanced-hotpicks.js"></script>
     <script src="js/enhanced-hotpicks-ui.js"></script>
     <script src="js/demo-interface.js"></script>
