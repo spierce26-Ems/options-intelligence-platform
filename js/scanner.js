@@ -22,12 +22,34 @@ const Scanner = {
         const stocks = OptionsData.ROBINHOOD_STOCKS.slice(0, 50); // Limit for performance
         let scanned = 0;
         
+        // Check if real-time data is available
+        const useRealData = window.RealTimeData && 
+            (RealTimeData.apis.polygon.enabled || RealTimeData.apis.tradier.enabled || RealTimeData.apis.yahoo.enabled);
+        
+        console.log(useRealData ? '✅ Scanner using REAL market data' : '⚠️ Scanner using simulated data');
+        
         for (const symbol of stocks) {
             try {
-                const stockPrice = await OptionsData.getStockPrice(symbol);
-                if (!stockPrice) continue;
+                // Use RealTimeData if available, otherwise fallback to OptionsData
+                let stockPrice;
+                let optionsChain;
                 
-                const optionsChain = OptionsData.generateOptionsChain(symbol, stockPrice);
+                if (useRealData) {
+                    const priceData = await RealTimeData.getStockPrice(symbol);
+                    if (!priceData || !priceData.price) continue;
+                    stockPrice = priceData.price;
+                    
+                    const chainData = await RealTimeData.getOptionsChain(symbol);
+                    if (chainData && chainData.options && chainData.options.length > 0) {
+                        optionsChain = chainData.options;
+                    } else {
+                        optionsChain = OptionsData.generateOptionsChain(symbol, stockPrice);
+                    }
+                } else {
+                    stockPrice = await OptionsData.getStockPrice(symbol);
+                    if (!stockPrice) continue;
+                    optionsChain = OptionsData.generateOptionsChain(symbol, stockPrice);
+                }
                 
                 // Apply filters and score options
                 for (const option of optionsChain) {
