@@ -14,6 +14,9 @@ let putCallChart = null;
 async function init() {
     console.log('Initializing Options Intelligence Platform...');
     
+    // Check data source and show banner
+    checkDataSource();
+    
     // Set up tab navigation
     setupTabNavigation();
     
@@ -742,6 +745,42 @@ function getScoreClass(score) {
     if (score >= 80) return 'high';
     if (score >= 60) return 'medium';
     return 'low';
+}
+
+/**
+ * Check data source and display warning banner
+ */
+function checkDataSource() {
+    const banner = document.getElementById('dataSourceBanner');
+    const bannerText = document.getElementById('dataSourceText');
+    
+    // Check if RealTimeData is available and configured
+    const hasRealData = window.RealTimeData && (
+        RealTimeData.apis.polygon.enabled ||
+        RealTimeData.apis.tradier.enabled ||
+        RealTimeData.apis.yahoo.enabled
+    );
+    
+    if (hasRealData) {
+        // Determine which API is active
+        let activeAPI = 'Unknown';
+        if (RealTimeData.apis.polygon.enabled) activeAPI = 'Polygon.io';
+        else if (RealTimeData.apis.tradier.enabled) activeAPI = 'Tradier';
+        else if (RealTimeData.apis.yahoo.enabled) activeAPI = 'Yahoo Finance';
+        
+        banner.className = 'data-source-banner real-data';
+        bannerText.innerHTML = `<strong>✓ LIVE DATA MODE</strong> - Using real market data from ${activeAPI}`;
+        banner.style.display = 'block';
+        
+        console.log(`✅ Using REAL data from ${activeAPI}`);
+    } else {
+        // Show warning for simulated data
+        banner.className = 'data-source-banner simulated-data';
+        bannerText.innerHTML = `<strong>⚠️ DEMO MODE</strong> - Using simulated data. <a href="#" style="color: inherit; text-decoration: underline;" onclick="alert('To enable real data:\\n\\n1. Configure your API key in js/realtime-data.js\\n2. Set polygon.enabled = true\\n3. Refresh the page\\n\\nSee documentation for details.')">Enable Real Data</a>`;
+        banner.style.display = 'block';
+        
+        console.warn('⚠️ Using SIMULATED data - configure API keys for real data');
+    }
 }
 
 /**
