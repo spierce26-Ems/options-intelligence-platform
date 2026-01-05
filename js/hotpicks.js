@@ -20,12 +20,38 @@ const HotPicksEngine = {
         let scanned = 0;
         const totalStocks = allStocks.length;
         
+        // Check if real-time data is available
+        const useRealData = window.RealTimeData && 
+            (RealTimeData.apis.polygon.enabled || RealTimeData.apis.tradier.enabled || RealTimeData.apis.yahoo.enabled);
+        
+        console.log(useRealData ? '✅ Using REAL market data from API' : '⚠️ Using simulated data - configure API keys for real data');
+        
         for (const symbol of allStocks) {
             try {
-                const stockPrice = await OptionsData.getStockPrice(symbol);
-                if (!stockPrice) continue;
+                // Use RealTimeData if available, otherwise fallback to OptionsData
+                let stockPrice;
+                let optionsChain;
                 
-                const optionsChain = OptionsData.generateOptionsChain(symbol, stockPrice);
+                if (useRealData) {
+                    // REAL DATA from API
+                    const priceData = await RealTimeData.getStockPrice(symbol);
+                    if (!priceData || !priceData.price) continue;
+                    stockPrice = priceData.price;
+                    
+                    // Try to get real options chain
+                    const chainData = await RealTimeData.getOptionsChain(symbol);
+                    if (chainData && chainData.options && chainData.options.length > 0) {
+                        optionsChain = chainData.options;
+                    } else {
+                        // Fallback to simulated chain if real data unavailable
+                        optionsChain = OptionsData.generateOptionsChain(symbol, stockPrice);
+                    }
+                } else {
+                    // SIMULATED DATA (fallback)
+                    stockPrice = await OptionsData.getStockPrice(symbol);
+                    if (!stockPrice) continue;
+                    optionsChain = OptionsData.generateOptionsChain(symbol, stockPrice);
+                }
                 
                 // Filter by timeframe
                 const dteRange = this.getDTERange(timeframe);
