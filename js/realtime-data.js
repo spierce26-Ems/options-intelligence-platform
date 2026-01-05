@@ -96,9 +96,10 @@ const RealTimeData = {
         // 2. Try Yahoo Finance FIRST (free, no rate limit)
         if (this.apis.yahoo.enabled) {
             try {
-                const response = await fetch(
-                    `${this.apis.yahoo.baseUrl}/v8/finance/chart/${symbol}?interval=1d&range=1d`
-                );
+               const response = await fetch(
+    `https://corsproxy.io/?${encodeURIComponent(this.apis.yahoo.baseUrl + '/v8/finance/chart/' + symbol + '?interval=1d&range=1d')}`
+);
+
                 
                 if (response.ok) {
                     const data = await response.json();
