@@ -37,134 +37,122 @@
     <main class="main-content">
         <div class="container">
             
-            <!-- Hot Picks Tab (NEW) -->
+            <!-- Hot Picks Tab (V7 iOS-Inspired Design) -->
             <div id="hotpicks" class="tab-content active">
-                <div class="page-header">
-                    <h2><i class="fas fa-fire"></i> 🔥 Today's Hot Picks</h2>
-                    <p>AI-Powered Daily Recommendations for Maximum Returns</p>
-                </div>
-
-                <!-- Daily Summary -->
-                <div class="ios-card hot-picks-summary">
-                    <div class="summary-header">
-                        <div class="summary-icon">
-                            <i class="fas fa-rocket"></i>
-                        </div>
-                        <div class="summary-text">
-                            <h3>Daily Market Outlook</h3>
-                            <p id="marketOutlook">Analyzing market conditions...</p>
-                        </div>
+                
+                <!-- Page Header -->
+                <div class="trading-header">
+                    <div>
+                        <h1 class="trading-title">Hot Picks</h1>
+                        <p class="trading-subtitle">AI-powered opportunities with institutional-grade intelligence</p>
                     </div>
-                    <div class="summary-metrics">
-                        <div class="summary-metric">
-                            <span class="metric-label">Opportunities Found</span>
-                            <span class="metric-value" id="opportunitiesCount">0</span>
-                        </div>
-                        <div class="summary-metric">
-                            <span class="metric-label">Avg Return Potential</span>
-                            <span class="metric-value positive" id="avgReturn">0%</span>
-                        </div>
-                        <div class="summary-metric">
-                            <span class="metric-label">Best Time Frame</span>
-                            <span class="metric-value" id="bestTimeframe">-</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Time Frame Selector -->
-                <div class="ios-card">
-                    <h3><i class="fas fa-clock"></i> Select Time Frame</h3>
                     <div class="timeframe-selector">
-                        <button class="timeframe-btn active" data-timeframe="short">
-                            <i class="fas fa-bolt"></i>
-                            <span>Short Term</span>
-                            <small>1-7 Days</small>
-                        </button>
-                        <button class="timeframe-btn" data-timeframe="medium">
-                            <i class="fas fa-calendar-alt"></i>
-                            <span>Medium Term</span>
-                            <small>1-4 Weeks</small>
-                        </button>
-                        <button class="timeframe-btn" data-timeframe="long">
-                            <i class="fas fa-calendar-check"></i>
-                            <span>Long Term</span>
-                            <small>1-3 Months</small>
-                        </button>
+                        <button class="timeframe-option active" data-timeframe="short">1-7D</button>
+                        <button class="timeframe-option" data-timeframe="medium">1-4W</button>
+                        <button class="timeframe-option" data-timeframe="long">1-3M</button>
                     </div>
                 </div>
 
-                <!-- Top 10 Hot Picks -->
-                <div class="ios-card">
-                    <div class="card-header-ios">
-                        <h3><i class="fas fa-trophy"></i> Top 10 Opportunities Today</h3>
-                        <button class="refresh-btn" onclick="refreshHotPicks()">
-                            <i class="fas fa-sync-alt"></i>
-                        </button>
+                <!-- KPI Dashboard - 4 Primary Metrics -->
+                <div class="kpi-dashboard">
+                    <div class="kpi-card-primary">
+                        <div class="kpi-label">Opportunities</div>
+                        <div class="kpi-value" id="opportunitiesCount">0</div>
+                        <div class="kpi-change neutral">
+                            <span>—</span>
+                        </div>
                     </div>
-                    <div id="hotPicksList" class="hot-picks-list">
-                        <div class="loading-ios">
-                            <div class="spinner-ios"></div>
-                            <p>Analyzing 1000+ options with AI algorithms...</p>
+                    <div class="kpi-card-primary">
+                        <div class="kpi-label">Avg Return</div>
+                        <div class="kpi-value" id="avgReturn">+0%</div>
+                        <div class="kpi-change neutral" id="avgReturnChange">
+                            <span>—</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card-primary">
+                        <div class="kpi-label">Win Rate</div>
+                        <div class="kpi-value" id="winRateKPI">0%</div>
+                        <div class="kpi-change neutral" id="winRateChange">
+                            <span>—</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card-primary">
+                        <div class="kpi-label">Sharpe Ratio</div>
+                        <div class="kpi-value" id="sharpeRatioKPI">0.0</div>
+                        <div class="kpi-change neutral">
+                            <span>—</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Detailed Analysis -->
-                <div class="ios-card" id="detailedAnalysis" style="display: none;">
-                    <h3><i class="fas fa-chart-line"></i> Detailed Analysis</h3>
-                    <div id="analysisContent"></div>
-                </div>
-
-                <!-- Backtesting Results -->
-                <div class="ios-card">
-                    <h3><i class="fas fa-history"></i> Backtesting Performance</h3>
-                    <div class="backtest-grid">
-                        <div class="backtest-metric">
-                            <div class="backtest-icon success">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
-                            <div class="backtest-info">
-                                <span class="backtest-label">Win Rate (30 Days)</span>
-                                <span class="backtest-value" id="winRate30">0%</span>
-                            </div>
-                        </div>
-                        <div class="backtest-metric">
-                            <div class="backtest-icon primary">
-                                <i class="fas fa-dollar-sign"></i>
-                            </div>
-                            <div class="backtest-info">
-                                <span class="backtest-label">Avg Return</span>
-                                <span class="backtest-value" id="avgReturnBacktest">0%</span>
-                            </div>
-                        </div>
-                        <div class="backtest-metric">
-                            <div class="backtest-icon warning">
-                                <i class="fas fa-exclamation-triangle"></i>
-                            </div>
-                            <div class="backtest-info">
-                                <span class="backtest-label">Max Drawdown</span>
-                                <span class="backtest-value" id="maxDrawdown">0%</span>
-                            </div>
-                        </div>
-                        <div class="backtest-metric">
-                            <div class="backtest-icon info">
-                                <i class="fas fa-bullseye"></i>
-                            </div>
-                            <div class="backtest-info">
-                                <span class="backtest-label">Sharpe Ratio</span>
-                                <span class="backtest-value" id="sharpeRatio">0.0</span>
-                            </div>
+                <!-- World Event Analyzer - Clean, No Decoration -->
+                <div class="event-analyzer">
+                    <div class="event-analyzer-header">
+                        <h2 class="event-analyzer-title">World Event Analyzer</h2>
+                        <p class="event-analyzer-subtitle">Analyze how global events impact options opportunities</p>
+                    </div>
+                    
+                    <div class="event-input-group">
+                        <label class="event-input-label" for="eventInput">Describe a world event</label>
+                        <input 
+                            type="text" 
+                            id="eventInput" 
+                            class="event-input" 
+                            placeholder="E.g., Fed raises interest rates by 0.25%"
+                        />
+                        
+                        <div class="event-controls">
+                            <button class="button button-primary" onclick="analyzeWorldEvent()">
+                                Analyze Event
+                            </button>
+                            <button class="button button-ghost" onclick="clearEventAnalysis()">
+                                Clear
+                            </button>
                         </div>
                     </div>
-                    <canvas id="backtestChart" style="height: 300px; margin-top: 20px;"></canvas>
+
+                    <div class="event-examples">
+                        <p class="examples-label">Example events:</p>
+                        <div class="example-chips">
+                            <button class="example-chip" onclick="document.getElementById('eventInput').value='Fed raises interest rates by 0.25%'">Fed raises rates</button>
+                            <button class="example-chip" onclick="document.getElementById('eventInput').value='Oil prices surge due to Middle East tensions'">Oil prices surge</button>
+                            <button class="example-chip" onclick="document.getElementById('eventInput').value='Tech regulation announcement'">Tech regulation</button>
+                            <button class="example-chip" onclick="document.getElementById('eventInput').value='China stimulus package'">China stimulus</button>
+                            <button class="example-chip" onclick="document.getElementById('eventInput').value='Strong dollar pressure'">Strong dollar</button>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Opportunities List -->
+                <div class="opportunities-list" id="hotPicksList">
+                    <div class="loading-state">
+                        <div class="loading-spinner"></div>
+                        <p>Analyzing opportunities with World Event Intelligence...</p>
+                    </div>
+                </div>
+
+                <!-- Backtesting Chart - One Dominant Chart -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Backtesting Performance</h3>
+                        <div class="segmented-control">
+                            <button class="segment active" data-period="30">30D</button>
+                            <button class="segment" data-period="90">90D</button>
+                            <button class="segment" data-period="365">1Y</button>
+                        </div>
+                    </div>
+                    <canvas id="backtestChart" class="chart-canvas"></canvas>
+                </div>
+
             </div>
             
-            <!-- Ticker Search Tab (NEW) -->
+            <!-- Ticker Search Tab -->
             <div id="ticker-search" class="tab-content">
-                <div class="page-header">
-                    <h2><i class="fas fa-search-dollar"></i> 🔍 Analyze Any Ticker</h2>
-                    <p>Deep-dive options analysis for your specific stock</p>
+                <div class="trading-header">
+                    <div>
+                        <h1 class="trading-title">Analyze Any Ticker</h1>
+                        <p class="trading-subtitle">Deep-dive options analysis for your specific stock</p>
+                    </div>
                 </div>
 
                 <!-- Search Box -->
@@ -240,9 +228,11 @@
             
             <!-- Scanner Tab -->
             <div id="scanner" class="tab-content">
-                <div class="page-header">
-                    <h2><i class="fas fa-search"></i> Options Chain Scanner</h2>
-                    <p>Scan 1000+ stocks for the best options opportunities available on Robinhood</p>
+                <div class="trading-header">
+                    <div>
+                        <h1 class="trading-title">Options Scanner</h1>
+                        <p class="trading-subtitle">Scan 1000+ stocks for the best options opportunities</p>
+                    </div>
                 </div>
 
                 <!-- Filters -->
@@ -338,9 +328,11 @@
 
             <!-- Signals Tab -->
             <div id="signals" class="tab-content">
-                <div class="page-header">
-                    <h2><i class="fas fa-signal"></i> Trading Signals</h2>
-                    <p>Institutional-grade algorithmic trading signals</p>
+                <div class="trading-header">
+                    <div>
+                        <h1 class="trading-title">Trading Signals</h1>
+                        <p class="trading-subtitle">Institutional-grade algorithmic trading signals</p>
+                    </div>
                 </div>
 
                 <!-- Signal Categories -->
@@ -404,9 +396,11 @@
 
             <!-- Greeks Tab -->
             <div id="greeks" class="tab-content">
-                <div class="page-header">
-                    <h2><i class="fas fa-calculator"></i> Options Greeks Analysis</h2>
-                    <p>Advanced Greeks calculations and risk metrics</p>
+                <div class="trading-header">
+                    <div>
+                        <h1 class="trading-title">Greeks Analysis</h1>
+                        <p class="trading-subtitle">Advanced Greeks calculations and risk metrics</p>
+                    </div>
                 </div>
 
                 <!-- Greeks Dashboard -->
@@ -473,9 +467,11 @@
 
             <!-- Strategies Tab -->
             <div id="strategies" class="tab-content">
-                <div class="page-header">
-                    <h2><i class="fas fa-chess"></i> Options Strategies</h2>
-                    <p>Pre-built strategies for every market condition</p>
+                <div class="trading-header">
+                    <div>
+                        <h1 class="trading-title">Options Strategies</h1>
+                        <p class="trading-subtitle">Pre-built strategies for every market condition</p>
+                    </div>
                 </div>
 
                 <!-- Strategy Cards -->
@@ -615,9 +611,11 @@
 
             <!-- Flow Tab -->
             <div id="flow" class="tab-content">
-                <div class="page-header">
-                    <h2><i class="fas fa-water"></i> Options Flow Analysis</h2>
-                    <p>Track institutional money flow and smart money activity</p>
+                <div class="trading-header">
+                    <div>
+                        <h1 class="trading-title">Options Flow</h1>
+                        <p class="trading-subtitle">Track institutional money flow and smart money activity</p>
+                    </div>
                 </div>
 
                 <!-- Flow Metrics -->
@@ -690,9 +688,11 @@
 
             <!-- Portfolio Tab -->
             <div id="portfolio" class="tab-content">
-                <div class="page-header">
-                    <h2><i class="fas fa-wallet"></i> Options Portfolio Tracker</h2>
-                    <p>Track your options positions and performance</p>
+                <div class="trading-header">
+                    <div>
+                        <h1 class="trading-title">Portfolio Tracker</h1>
+                        <p class="trading-subtitle">Track your options positions and performance</p>
+                    </div>
                 </div>
 
                 <!-- Portfolio Summary -->
@@ -829,7 +829,57 @@
     <script src="js/enhanced-hotpicks-ui.js"></script>
     <script src="js/demo-interface.js"></script>
     
+    <!-- V7 UI Adapter -->
+    <script src="js/v7-hotpicks-adapter.js"></script>
+    
     <script src="js/main.js"></script>
     <script src="js/hotpicks-ui.js"></script>
+    
+    <!-- V7 Navigation Handler -->
+    <script>
+        // Navigation Tab Switching
+        document.addEventListener('DOMContentLoaded', function() {
+            const navItems = document.querySelectorAll('.nav-item');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            navItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remove active class from all nav items
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    
+                    // Add active class to clicked item
+                    this.classList.add('active');
+                    
+                    // Hide all tab contents
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    // Show the corresponding tab content
+                    const tabId = this.getAttribute('data-tab');
+                    const targetTab = document.getElementById(tabId);
+                    if (targetTab) {
+                        targetTab.classList.add('active');
+                    }
+                });
+            });
+            
+            // Timeframe selector
+            document.querySelectorAll('.timeframe-option').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.timeframe-option').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+            
+            // Chart period selector
+            document.querySelectorAll('.segment').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.segment').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        });
+    </script>
 </body>
 </html>
