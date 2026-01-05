@@ -1,6 +1,6 @@
 /**
  * REAL-TIME DATA INTEGRATION MODULE
- * Connects to multiple options data APIs
+ * Connects to multiple options data APIs with aggressive caching and rate limiting
  */
 
 const RealTimeData = {
@@ -13,71 +13,134 @@ const RealTimeData = {
         },
         tradier: {
             enabled: false,
-            apiKey: '', // Set your API key here when you get it
+            apiKey: '',
             sandbox: true,
             baseUrl: 'https://sandbox.tradier.com/v1'
         },
         tdameritrade: {
             enabled: false,
-            apiKey: '', // Set your API key here
+            apiKey: '',
             baseUrl: 'https://api.tdameritrade.com/v1'
         },
         yahoo: {
-            enabled: true, // Keep as fallback
+            enabled: true, // Free fallback
             baseUrl: 'https://query1.finance.yahoo.com'
         }
     },
     
-    // Simple cache for API responses
+    // AGGRESSIVE CACHING - Cache data for 5 minutes
     cache: {},
+    cacheTimeout: 5 * 60 * 1000, // 5 minutes
+    
+    // RATE LIMITING - Track API calls to prevent exhaustion
+    rateLimiter: {
+        calls: [],
+        maxCallsPerMinute: 5, // Free tier limit
+        lastWarning: 0
+    },
     
     /**
-     * Fetch real-time stock price
+     * Check if we're hitting rate limits
      */
-    async getStockPrice(symbol) {
-        // Check cache first (60 second cache)
-        const cacheKey = `price_${symbol}`;
-        const cached = this.cache[cacheKey];
-        if (cached && Date.now() - cached.time < 60000) {
-            return cached.data;
+    checkRateLimit() {
+        const now = Date.now();
+        const oneMinuteAgo = now - 60000;
+        
+        // Remove calls older than 1 minute
+        this.rateLimiter.calls = this.rateLimiter.calls.filter(time => time > oneMinuteAgo);
+        
+        // Check if we're near the limit
+        if (this.rateLimiter.calls.length >= this.rateLimiter.maxCallsPerMinute) {
+            // Only show warning once per minute
+            if (now - this.rateLimiter.lastWarning > 60000) {
+                console.warn('⚠️ API Rate limit reached. Using cached data for next 60 seconds.');
+                this.rateLimiter.lastWarning = now;
+            }
+            return false; // Don't allow more calls
         }
         
-        // Try Polygon first
+        return true; // OK to make call
+    },
+    
+    /**
+     * Record an API call
+     */
+    recordAPICall() {
+        this.rateLimiter.calls.push(Date.now());
+    },
+    
+    /**
+     * Get cached data if available and fresh
+     */
+    getCached(key) {
+        const cached = this.cache[key];
+        if (cached && (Date.now() - cached.timestamp) < this.cacheTimeout) {
+            console.log(`📦 Using cached data for ${key} (${Math.round((Date.now() - cached.timestamp) / 1000)}s old)`);
+            return cached.data;
+        }
+        return null;
+    },
+    
+    /**
+     * Store data in cache
+     */
+    setCache(key, data) {
+        this.cache[key] = {
+            data: data,
+            timestamp: Date.now()
+        };
+    },
+    
+    /**
+     * Fetch real-time stock price (with caching and rate limiting)
+     */
+    async getStockPrice(symbol) {
+        const cacheKey = `price_${symbol}`;
+        
+        // 1. Try cache first
+        const cached = this.getCached(cacheKey);
+        if (cached) return cached;
+        
+        // 2. Check rate limit
+        if (!this.checkRateLimit()) {
+            const cached = this.cache[cacheKey];
+            if (cached) {
+                return { ...cached.data, fromCache: true };
+            }
+            // No cache available, return simulated data
+            return this.generateSimulatedPrice(symbol);
+        }
+        
+        // 3. Try Polygon.io first (if enabled)
         if (this.apis.polygon.enabled) {
             try {
-                const url = `${this.apis.polygon.baseUrl}/v2/aggs/ticker/${symbol}/prev?adjusted=true&apiKey=${this.apis.polygon.apiKey}`;
-                const response = await fetch(url);
-                const data = await response.json();
+                this.recordAPICall();
+                const response = await fetch(
+                    `${this.apis.polygon.baseUrl}/v2/aggs/ticker/${symbol}/prev?adjusted=true&apiKey=${this.apis.polygon.apiKey}`
+                );
                 
-                if (data.results && data.results[0]) {
-                    const result = data.results[0];
-                    const priceData = {
-                        price: result.c, // close price
-                        open: result.o,
-                        high: result.h,
-                        low: result.l,
-                        change: result.c - result.o,
-                        changePercent: ((result.c - result.o) / result.o) * 100,
-                        volume: result.v,
-                        timestamp: Date.now(),
-                        source: 'polygon'
-                    };
-                    
-                    // Cache it
-                    this.cache[cacheKey] = {
-                        data: priceData,
-                        time: Date.now()
-                    };
-                    
-                    console.log(`✅ Polygon: Got ${symbol} price: $${result.c}`);
-                    return priceData;
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.results && data.results[0]) {
+                        const result = data.results[0];
+                        const priceData = {
+                            price: result.c, // close price
+                            change: result.c - result.o, // close - open
+                            changePercent: ((result.c - result.o) / result.o) * 100,
+                            volume: result.v,
+                            timestamp: Date.now(),
+                            source: 'polygon'
+                        };
+                        this.setCache(cacheKey, priceData);
+                        return priceData;
+                    }
                 }
             } catch (error) {
-                console.log('Polygon failed, trying Yahoo:', error.message);
+                console.log('Polygon failed:', error.message);
             }
         }
         
-        // Try Yahoo Finance as fallback
+        // 4. Try Yahoo Finance (free, no limit)
         try {
             const response = await fetch(
                 `${this.apis.yahoo.baseUrl}/v8/finance/chart/${symbol}?interval=1d&range=1d`,
@@ -95,23 +158,17 @@ const RealTimeData = {
                     timestamp: Date.now(),
                     source: 'yahoo'
                 };
-                
-                // Cache it
-                this.cache[cacheKey] = {
-                    data: priceData,
-                    time: Date.now()
-                };
-                
-                console.log(`✅ Yahoo: Got ${symbol} price: $${priceData.price}`);
+                this.setCache(cacheKey, priceData);
                 return priceData;
             }
         } catch (error) {
             console.log('Yahoo Finance failed:', error.message);
         }
         
-        // Try Tradier if configured
+        // 5. Try Tradier if configured
         if (this.apis.tradier.enabled) {
             try {
+                this.recordAPICall();
                 const url = `${this.apis.tradier.baseUrl}/markets/quotes?symbols=${symbol}`;
                 const response = await fetch(url, {
                     headers: {
@@ -131,13 +188,7 @@ const RealTimeData = {
                         timestamp: Date.now(),
                         source: 'tradier'
                     };
-                    
-                    // Cache it
-                    this.cache[cacheKey] = {
-                        data: priceData,
-                        time: Date.now()
-                    };
-                    
+                    this.setCache(cacheKey, priceData);
                     return priceData;
                 }
             } catch (error) {
@@ -145,33 +196,32 @@ const RealTimeData = {
             }
         }
         
-        // Fallback to simulated data
-        console.log(`⚠️ Using simulated data for ${symbol}`);
-        return {
-            price: generateSimulatedPrice(symbol),
-            change: 0,
-            changePercent: 0,
-            volume: 0,
-            timestamp: Date.now(),
-            source: 'simulated',
-            warning: '⚠️ Using simulated data. Real API failed.'
-        };
+        // 6. Fallback to simulated data
+        return this.generateSimulatedPrice(symbol);
     },
     
     /**
-     * Fetch real options chain
+     * Fetch real options chain (with caching)
      */
     async getOptionsChain(symbol) {
-        // Check cache first (5 minute cache for options)
         const cacheKey = `options_${symbol}`;
-        const cached = this.cache[cacheKey];
-        if (cached && Date.now() - cached.time < 300000) {
-            return cached.data;
+        
+        // Try cache first (options data cached for 5 minutes)
+        const cached = this.getCached(cacheKey);
+        if (cached) return cached;
+        
+        // Check rate limit
+        if (!this.checkRateLimit()) {
+            const cached = this.cache[cacheKey];
+            if (cached) {
+                return { ...cached.data, fromCache: true };
+            }
         }
         
         // Try Tradier if configured
         if (this.apis.tradier.enabled) {
             try {
+                this.recordAPICall();
                 // Get expiration dates
                 const expUrl = `${this.apis.tradier.baseUrl}/markets/options/expirations?symbol=${symbol}`;
                 const expResponse = await fetch(expUrl, {
@@ -191,6 +241,7 @@ const RealTimeData = {
                 
                 // Fetch chain for each expiration
                 for (const expiration of expirations) {
+                    this.recordAPICall();
                     const chainUrl = `${this.apis.tradier.baseUrl}/markets/options/chains?symbol=${symbol}&expiration=${expiration}`;
                     const chainResponse = await fetch(chainUrl, {
                         headers: {
@@ -228,19 +279,14 @@ const RealTimeData = {
                     }
                 }
                 
-                const chainData = {
+                const optionsData = {
                     options: allOptions,
                     source: 'tradier',
                     timestamp: Date.now()
                 };
                 
-                // Cache it
-                this.cache[cacheKey] = {
-                    data: chainData,
-                    time: Date.now()
-                };
-                
-                return chainData;
+                this.setCache(cacheKey, optionsData);
+                return optionsData;
                 
             } catch (error) {
                 console.log('Tradier options failed:', error.message);
@@ -248,22 +294,46 @@ const RealTimeData = {
         }
         
         // Fallback to simulated data
-        console.log(`⚠️ Using simulated options data for ${symbol}`);
         const stockPrice = await this.getStockPrice(symbol);
-        const chainData = {
+        const optionsData = {
             options: OptionsData.generateOptionsChain(symbol, stockPrice.price),
             source: 'simulated',
             timestamp: Date.now(),
-            warning: '⚠️ Using simulated data. Real API not available.'
+            warning: '⚠️ Using simulated data. Configure API keys for real-time options data.'
         };
         
-        // Cache it
-        this.cache[cacheKey] = {
-            data: chainData,
-            time: Date.now()
-        };
+        this.setCache(cacheKey, optionsData);
+        return optionsData;
+    },
+    
+    /**
+     * Generate simulated price data
+     */
+    generateSimulatedPrice(symbol) {
+        const basePrice = {
+            'AAPL': 180,
+            'TSLA': 250,
+            'NVDA': 500,
+            'SPY': 450,
+            'QQQ': 380,
+            'MSFT': 380,
+            'AMZN': 150,
+            'META': 350,
+            'GOOGL': 140
+        }[symbol] || 100;
         
-        return chainData;
+        const randomChange = (Math.random() - 0.5) * 10;
+        const price = basePrice + randomChange;
+        
+        return {
+            price: price,
+            change: randomChange,
+            changePercent: (randomChange / basePrice) * 100,
+            volume: Math.floor(Math.random() * 10000000),
+            timestamp: Date.now(),
+            source: 'simulated',
+            warning: '⚠️ Using simulated data. Real APIs configured but rate limited or unavailable.'
+        };
     },
     
     /**
@@ -277,7 +347,6 @@ const RealTimeData = {
             console.log(`✅ ${apiName} API configured`);
             return true;
         }
-        console.log(`❌ Unknown API: ${apiName}`);
         return false;
     },
     
@@ -285,37 +354,19 @@ const RealTimeData = {
      * Test API connection
      */
     async testConnection(apiName) {
-        console.log(`Testing ${apiName} connection...`);
-        
-        if (apiName === 'polygon') {
-            try {
-                const result = await this.getStockPrice('AAPL');
-                if (result.source === 'polygon') {
-                    console.log('✅ Polygon connection successful!');
-                    console.log('AAPL Price:', result.price);
-                    return true;
-                }
-            } catch (error) {
-                console.log('❌ Polygon connection failed:', error.message);
+        try {
+            const testResult = await this.getStockPrice('AAPL');
+            if (testResult.source === apiName) {
+                console.log(`✅ ${apiName} connection successful!`, testResult);
+                return true;
+            } else {
+                console.log(`⚠️ ${apiName} not used. Data from ${testResult.source}`);
                 return false;
             }
+        } catch (error) {
+            console.error(`❌ ${apiName} connection failed:`, error);
+            return false;
         }
-        
-        if (apiName === 'tradier') {
-            try {
-                const result = await this.getStockPrice('AAPL');
-                if (result.source === 'tradier') {
-                    console.log('✅ Tradier connection successful!');
-                    return true;
-                }
-            } catch (error) {
-                console.log('❌ Tradier connection failed:', error.message);
-                return false;
-            }
-        }
-        
-        console.log('❌ API not configured or test failed');
-        return false;
     },
     
     /**
@@ -323,43 +374,32 @@ const RealTimeData = {
      */
     clearCache() {
         this.cache = {};
-        console.log('✅ Cache cleared');
+        console.log('🗑️ Cache cleared');
     },
     
     /**
-     * Get cache stats
+     * Get cache statistics
      */
     getCacheStats() {
         const keys = Object.keys(this.cache);
-        console.log(`Cache contains ${keys.length} items:`);
-        keys.forEach(key => {
-            const age = Date.now() - this.cache[key].time;
-            console.log(`  ${key}: ${Math.floor(age/1000)}s old`);
-        });
+        const stats = {
+            totalItems: keys.length,
+            items: keys.map(key => ({
+                key,
+                age: Math.round((Date.now() - this.cache[key].timestamp) / 1000) + 's'
+            })),
+            rateLimitCalls: this.rateLimiter.calls.length,
+            rateLimitRemaining: this.rateLimiter.maxCallsPerMinute - this.rateLimiter.calls.length
+        };
+        console.table(stats.items);
+        console.log(`Rate Limit: ${stats.rateLimitCalls}/${this.rateLimiter.maxCallsPerMinute} calls used, ${stats.rateLimitRemaining} remaining`);
+        return stats;
     }
 };
 
-/**
- * Helper function to generate simulated price
- */
-function generateSimulatedPrice(symbol) {
-    // Generate a consistent price based on symbol
-    const hash = symbol.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const basePrice = 50 + (hash % 450); // Price between $50 and $500
-    return basePrice;
-}
-
-// Auto-test connection on load
+// Auto-test on load
 if (RealTimeData.apis.polygon.enabled) {
     console.log('🚀 Polygon API is enabled');
-    console.log('Testing connection...');
-    RealTimeData.testConnection('polygon').then(success => {
-        if (success) {
-            console.log('✅ Ready to fetch real-time data!');
-        } else {
-            console.log('⚠️ Will use fallback data sources');
-        }
-    });
-} else {
-    console.log('⚠️ No real-time API configured. Using simulated data.');
+    console.log('📊 Cache timeout:', RealTimeData.cacheTimeout / 1000, 'seconds');
+    console.log('⏱️ Rate limit:', RealTimeData.rateLimiter.maxCallsPerMinute, 'calls/minute');
 }
