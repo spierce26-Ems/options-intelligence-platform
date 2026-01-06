@@ -7,8 +7,8 @@ const RealTimeData = {
     // API Configuration
     apis: {
         polygon: {
-            enabled: false, // Disabled - use Yahoo Finance instead
-            apiKey: 'i4uMiWTkCkQqeUwrFpUJpCwbOXfh5k4b', // Wrong key format (Finnhub, not Polygon/Massive)
+            enabled: true, // Enable Massive.com API
+            apiKey: 'i4uMiWTkCkQqeUwrFpUJpCwbOXfh5k4b', // Replace with your NEW Massive.com API key
             baseUrl: 'https://api.polygon.io'
         },
         tradier: {
