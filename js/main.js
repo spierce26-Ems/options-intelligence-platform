@@ -387,14 +387,16 @@ async function loadGreeksAnalysis() {
             
             const chain = OptionsData.generateOptionsChain(symbol, stockPrice);
             
-            // Find high delta, gamma, theta, vega opportunities
+            // Find options with notable Greeks (more inclusive thresholds)
             const interesting = chain.filter(opt => 
-                (Math.abs(opt.delta) > 0.5 || opt.gamma > 0.03 || 
-                 Math.abs(opt.theta) > 0.1 || opt.vega > 0.15) &&
-                opt.volume > 100
+                (Math.abs(opt.delta) > 0.3 || // Moderate delta
+                 opt.gamma > 0.01 ||           // Notable gamma
+                 Math.abs(opt.theta) > 0.05 || // Meaningful decay
+                 opt.vega > 0.08) &&           // IV sensitivity
+                opt.volume > 50                // Reasonable volume
             );
             
-            results.push(...interesting.slice(0, 5));
+            results.push(...interesting.slice(0, 10)); // More options per stock
         }
         
         // Sort by most interesting
@@ -452,15 +454,18 @@ function displayGreeksResults(results) {
  * Update Greeks metrics
  */
 function updateGreeksMetrics(results) {
-    const deltaCount = results.filter(opt => Math.abs(opt.delta) > 0.6).length;
-    const gammaCount = results.filter(opt => opt.gamma > 0.03).length;
-    const thetaCount = results.filter(opt => Math.abs(opt.theta) > 0.1).length;
-    const vegaCount = results.filter(opt => opt.vega > 0.15).length;
+    // More inclusive thresholds to show meaningful opportunities
+    const deltaCount = results.filter(opt => Math.abs(opt.delta) > 0.5).length;
+    const gammaCount = results.filter(opt => opt.gamma > 0.015).length;
+    const thetaCount = results.filter(opt => Math.abs(opt.theta) > 0.05).length;
+    const vegaCount = results.filter(opt => opt.vega > 0.1).length;
     
     document.getElementById('deltaCount').textContent = deltaCount;
     document.getElementById('gammaCount').textContent = gammaCount;
     document.getElementById('thetaCount').textContent = thetaCount;
     document.getElementById('vegaCount').textContent = vegaCount;
+    
+    console.log(`📊 Greeks Metrics: Delta=${deltaCount}, Gamma=${gammaCount}, Theta=${thetaCount}, Vega=${vegaCount}`);
 }
 
 /**
