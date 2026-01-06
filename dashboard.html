@@ -423,9 +423,14 @@
                     <div class="section-title">📈 Active Positions</div>
                     <div class="section-subtitle">Monitor your open trades</div>
                 </div>
-                <button class="btn-secondary btn" onclick="refreshPositions()">
-                    Refresh
-                </button>
+                <div style="display: flex; gap: 12px;">
+                    <button class="btn" onclick="manualEntry()">
+                        + Add Position
+                    </button>
+                    <button class="btn-secondary btn" onclick="refreshPositions()">
+                        Refresh
+                    </button>
+                </div>
             </div>
             
             <div id="positionsContainer">
@@ -612,6 +617,56 @@
                 updateStats();
                 
                 alert(`✅ Position opened: ${signal.symbol} ${signal.strategy}`);
+            } catch (error) {
+                alert(`❌ Error: ${error.message}`);
+            }
+        }
+
+        // Manual position entry
+        function manualEntry() {
+            const symbol = prompt('Enter stock symbol (e.g., AAPL, SPY):', 'AAPL');
+            if (!symbol) return;
+            
+            const action = prompt('Enter action (SELL or BUY):', 'SELL');
+            if (!action || !['SELL', 'BUY'].includes(action.toUpperCase())) {
+                alert('❌ Action must be SELL or BUY');
+                return;
+            }
+            
+            const strategy = prompt('Enter strategy (e.g., Iron Condor, Credit Spread):', 'Iron Condor');
+            if (!strategy) return;
+            
+            const entryPrice = prompt('Enter stock price at entry:', '225');
+            if (!entryPrice) return;
+            
+            const entryIV = prompt('Enter IV at entry (%):', '35');
+            if (!entryIV) return;
+            
+            const entryIVRank = prompt('Enter IV Rank at entry (%):', '85');
+            if (!entryIVRank) return;
+            
+            const capital = prompt('Enter capital for this trade ($):', '1000');
+            if (!capital) return;
+            
+            try {
+                const position = {
+                    symbol: symbol.toUpperCase(),
+                    action: action.toUpperCase(),
+                    strategy: strategy,
+                    entryPrice: parseFloat(entryPrice),
+                    entryIV: parseFloat(entryIV),
+                    entryIVRank: parseFloat(entryIVRank),
+                    capital: parseFloat(capital),
+                    confidence: 85,
+                    targetProfit: 0.50,
+                    maxHoldDays: 21
+                };
+                
+                PositionManager.addPosition(position);
+                refreshPositions();
+                updateStats();
+                
+                alert(`✅ Position opened: ${position.symbol} ${position.strategy}\nCapital: $${position.capital}\nEntry Price: $${position.entryPrice}`);
             } catch (error) {
                 alert(`❌ Error: ${error.message}`);
             }
