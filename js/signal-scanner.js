@@ -68,6 +68,21 @@ const SignalScanner = {
         timestamp: null
     },
     
+    // API call tracking for rate limiting
+    apiCallTracker: {
+        calls: [],
+        maxCallsPerMinute: 90, // Conservative limit (10 below actual limit)
+        retryDelay: 5000 // 5 seconds for 429 errors
+    },
+    
+    // Data cache to reduce API calls
+    dataCache: {
+        prices: new Map(),
+        options: new Map(),
+        historical: new Map(),
+        ttl: 60000 // 1 minute TTL
+    },
+    
     /**
      * Scan all watchlist stocks for opportunities
      */
@@ -86,8 +101,13 @@ const SignalScanner = {
                 }
                 
                 // Rate limiting - Starter plan has 100 calls/min
-                // Reduced delay from 200ms to 50ms (12 stocks/min → 48 stocks/min)
-                await this.sleep(50);
+                // Each stock needs 3 API calls (price, options, historical)
+                // 70 stocks × 3 = 210 calls (exceeds limit!)
+                // Solution: 1000ms delay = 60 stocks/hour = 180 calls/hour (stays under limit)
+                await this.sleep(1000);
+                
+                // Check if we're approaching rate limit
+                await this.checkRateLimit();
                 
             } catch (error) {
                 console.error(`   ❌ Error scanning ${symbol}:`, error.message);
@@ -110,19 +130,76 @@ const SignalScanner = {
     },
     
     /**
+     * Check rate limit and throttle if needed
+     */
+    async checkRateLimit() {
+        const now = Date.now();
+        const oneMinuteAgo = now - 60000;
+        
+        // Remove calls older than 1 minute
+        this.apiCallTracker.calls = this.apiCallTracker.calls.filter(time => time > oneMinuteAgo);
+        
+        // If approaching limit, wait
+        if (this.apiCallTracker.calls.length >= this.apiCallTracker.maxCallsPerMinute) {
+            const oldestCall = this.apiCallTracker.calls[0];
+            const waitTime = 60000 - (now - oldestCall) + 1000; // Wait until oldest call is >1 min old
+            console.log(`   ⏳ Rate limit approaching, waiting ${Math.round(waitTime/1000)}s...`);
+            await this.sleep(waitTime);
+        }
+    },
+    
+    /**
+     * Track API call for rate limiting
+     */
+    trackApiCall() {
+        this.apiCallTracker.calls.push(Date.now());
+    },
+    
+    /**
+     * Get cached data or fetch fresh
+     */
+    async getCachedData(key, fetchFn, cacheMap) {
+        const cached = cacheMap.get(key);
+        const now = Date.now();
+        
+        // Return cached if still valid
+        if (cached && (now - cached.timestamp) < this.dataCache.ttl) {
+            console.log(`   💾 Using cached data for ${key}`);
+            return cached.data;
+        }
+        
+        // Fetch fresh data
+        this.trackApiCall();
+        const data = await fetchFn();
+        
+        // Cache the result
+        cacheMap.set(key, { data, timestamp: now });
+        
+        return data;
+    },
+    
+    /**
      * Scan a single symbol for opportunities
      */
     async scanSymbol(symbol) {
         try {
-            // Get current stock price and IV
-            const stockData = await RealTimeData.getStockPrice(symbol);
+            // Get current stock price (with caching)
+            const stockData = await this.getCachedData(
+                `price_${symbol}`,
+                () => RealTimeData.getStockPrice(symbol),
+                this.dataCache.prices
+            );
             if (!stockData || !stockData.price) {
                 console.log(`   ⚠️ ${symbol}: No price data`);
                 return null;
             }
             
-            // Get options chain to calculate IV Rank
-            const optionsData = await RealTimeData.getOptionsChain(symbol);
+            // Get options chain to calculate IV Rank (with caching)
+            const optionsData = await this.getCachedData(
+                `options_${symbol}`,
+                () => RealTimeData.getOptionsChain(symbol),
+                this.dataCache.options
+            );
             if (!optionsData) {
                 console.log(`   ⚠️ ${symbol}: No options data`);
                 return null;
@@ -165,7 +242,13 @@ const SignalScanner = {
             return null;
             
         } catch (error) {
-            console.error(`   ❌ ${symbol}: Error scanning -`, error.message);
+            // Handle 429 rate limit errors with backoff
+            if (error.message && error.message.includes('429')) {
+                console.warn(`   🚨 ${symbol}: Rate limit hit, waiting ${this.apiCallTracker.retryDelay/1000}s...`);
+                await this.sleep(this.apiCallTracker.retryDelay);
+            } else {
+                console.error(`   ❌ ${symbol}: Error scanning -`, error.message);
+            }
             return null;
         }
     },
@@ -221,16 +304,16 @@ const SignalScanner = {
      * ENHANCED for Starter Plan with full historical data access
      */
     async calculateIVRank(symbol, currentIV) {
-        // Try to get historical IV from Massive.com
+        // Try to get historical IV from Massive.com (with caching)
         if (window.MassiveHistoricalData && MassiveHistoricalData.isConfigured()) {
             try {
                 const endDate = new Date();
                 const startDate = new Date(endDate.getTime() - 365 * 24 * 60 * 60 * 1000); // 1 year
                 
-                const historicalData = await MassiveHistoricalData.buildHistoricalDataset(
-                    symbol, 
-                    startDate, 
-                    endDate
+                const historicalData = await this.getCachedData(
+                    `historical_${symbol}`,
+                    () => MassiveHistoricalData.buildHistoricalDataset(symbol, startDate, endDate),
+                    this.dataCache.historical
                 );
                 
                 if (historicalData && historicalData.length > 30) {
