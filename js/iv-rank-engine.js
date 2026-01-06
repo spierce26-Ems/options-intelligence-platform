@@ -127,36 +127,69 @@ const IVRankEngine = {
         };
         
         // HIGH IV RANK = SELL PREMIUM
-        if (ivRank >= 80) {
+        if (ivRank >= 90) {
             signal.action = 'SELL';
-            signal.confidence = Math.min(95, 60 + (ivRank - 80) * 1.5);
+            signal.confidence = Math.min(95, 70 + (ivRank - 90));
             signal.strategy = 'Iron Condor';
-            signal.reasoning = `IV Rank ${ivRank}% is extremely high. Volatility likely to mean revert. Sell premium.`;
-            
-            // Calculate suggested Iron Condor strikes
+            signal.reasoning = `IV Rank ${ivRank}% is extremely high. Maximum premium selling opportunity.`;
             signal.trade = this.generateIronCondor(stockPrice, currentIV);
+        }
+        else if (ivRank >= 80) {
+            signal.action = 'SELL';
+            signal.confidence = Math.min(90, 65 + (ivRank - 80) * 1.5);
+            signal.strategy = 'Credit Spread';
+            signal.reasoning = `IV Rank ${ivRank}% is very high. Sell directional credit spread.`;
+            signal.trade = this.generateCreditSpread(stockPrice, currentIV);
         }
         // MODERATE-HIGH IV RANK = CONSIDER SELLING
         else if (ivRank >= 70) {
             signal.action = 'SELL';
-            signal.confidence = Math.min(75, 50 + (ivRank - 70));
-            signal.strategy = 'Iron Condor';
-            signal.reasoning = `IV Rank ${ivRank}% is elevated. Good opportunity to sell premium.`;
-            signal.trade = this.generateIronCondor(stockPrice, currentIV);
+            signal.confidence = Math.min(80, 55 + (ivRank - 70));
+            signal.strategy = 'Short Strangle';
+            signal.reasoning = `IV Rank ${ivRank}% is elevated. Sell premium with wider strikes.`;
+            signal.trade = this.generateShortStrangle(stockPrice, currentIV);
+        }
+        else if (ivRank >= 60) {
+            signal.action = 'SELL';
+            signal.confidence = Math.min(70, 50 + (ivRank - 60));
+            signal.strategy = 'Covered Call / Cash-Secured Put';
+            signal.reasoning = `IV Rank ${ivRank}% is moderately high. Consider income strategies.`;
+            signal.trade = this.generateIncomeStrategy(stockPrice, currentIV);
         }
         // LOW IV RANK = BUY PREMIUM
+        else if (ivRank <= 10) {
+            signal.action = 'BUY';
+            signal.confidence = Math.min(90, 60 + (10 - ivRank) * 2);
+            signal.strategy = 'Long Straddle';
+            signal.reasoning = `IV Rank ${ivRank}% is extremely low. Expect volatility expansion.`;
+            signal.trade = this.generateLongStraddle(stockPrice, currentIV);
+        }
         else if (ivRank <= 20) {
             signal.action = 'BUY';
             signal.confidence = Math.min(85, 50 + (20 - ivRank) * 1.5);
             signal.strategy = 'Debit Spread';
-            signal.reasoning = `IV Rank ${ivRank}% is extremely low. Volatility likely to expand. Buy premium.`;
+            signal.reasoning = `IV Rank ${ivRank}% is very low. Buy premium for directional play.`;
             signal.trade = this.generateDebitSpread(stockPrice, currentIV);
         }
-        // MODERATE IV RANK = WAIT
+        else if (ivRank <= 30) {
+            signal.action = 'BUY';
+            signal.confidence = Math.min(75, 45 + (30 - ivRank));
+            signal.strategy = 'Calendar Spread';
+            signal.reasoning = `IV Rank ${ivRank}% is low. Benefit from time decay and potential IV rise.`;
+            signal.trade = this.generateCalendarSpread(stockPrice, currentIV);
+        }
+        // MODERATE IV RANK = WAIT OR NEUTRAL
+        else if (ivRank >= 40 && ivRank <= 50) {
+            signal.action = 'NEUTRAL';
+            signal.confidence = 50;
+            signal.strategy = 'Butterfly Spread';
+            signal.reasoning = `IV Rank ${ivRank}% is neutral. Consider neutral strategies.`;
+            signal.trade = this.generateButterflySpread(stockPrice, currentIV);
+        }
         else {
             signal.action = 'WAIT';
             signal.confidence = 0;
-            signal.reasoning = `IV Rank ${ivRank}% is neutral. Wait for extremes (>70 or <30).`;
+            signal.reasoning = `IV Rank ${ivRank}% is neutral (30-60). Wait for extremes (>60 or <30).`;
         }
         
         return signal;
@@ -211,7 +244,202 @@ const IVRankEngine = {
     },
     
     /**
-     * Generate Debit Spread trade specifications
+     * Generate Credit Spread trade specifications
+     */
+    generateCreditSpread(stockPrice, currentIV) {
+        const dte = 35;
+        const stdDev = stockPrice * (currentIV / 100) * Math.sqrt(dte / 365);
+        const roundToStrike = (price) => Math.round(price / 5) * 5;
+        
+        // Bearish credit spread (put credit spread)
+        const shortPutStrike = roundToStrike(stockPrice - stdDev * 0.8);
+        const longPutStrike = roundToStrike(stockPrice - stdDev * 1.1);
+        
+        const width = shortPutStrike - longPutStrike;
+        const estimatedCredit = width * 0.35;
+        
+        return {
+            type: 'Put Credit Spread',
+            dte: dte,
+            strikes: {
+                short: shortPutStrike,
+                long: longPutStrike
+            },
+            width: width,
+            estimatedCredit: Math.round(estimatedCredit * 100),
+            maxProfit: Math.round(estimatedCredit * 100),
+            maxLoss: Math.round((width - estimatedCredit) * 100),
+            breakeven: shortPutStrike - estimatedCredit,
+            pop: 70,
+            targetProfit: '50%',
+            targetDays: 21
+        };
+    },
+    
+    /**
+     * Generate Short Strangle trade specifications
+     */
+    generateShortStrangle(stockPrice, currentIV) {
+        const dte = 35;
+        const stdDev = stockPrice * (currentIV / 100) * Math.sqrt(dte / 365);
+        const roundToStrike = (price) => Math.round(price / 5) * 5;
+        
+        // Wider strikes than iron condor
+        const shortPutStrike = roundToStrike(stockPrice - stdDev * 1.2);
+        const shortCallStrike = roundToStrike(stockPrice + stdDev * 1.2);
+        
+        const estimatedCredit = (stockPrice * currentIV / 100) * 0.15;
+        
+        return {
+            type: 'Short Strangle',
+            dte: dte,
+            strikes: {
+                shortPut: shortPutStrike,
+                shortCall: shortCallStrike
+            },
+            estimatedCredit: Math.round(estimatedCredit * 100),
+            maxProfit: Math.round(estimatedCredit * 100),
+            maxLoss: Infinity, // Undefined risk
+            breakevens: {
+                lower: shortPutStrike - estimatedCredit,
+                upper: shortCallStrike + estimatedCredit
+            },
+            pop: 65,
+            targetProfit: '50%',
+            targetDays: 21,
+            note: 'Undefined risk - consider adding protective wings'
+        };
+    },
+    
+    /**
+     * Generate Income Strategy (Covered Call or Cash-Secured Put)
+     */
+    generateIncomeStrategy(stockPrice, currentIV) {
+        const dte = 30;
+        const roundToStrike = (price) => Math.round(price / 5) * 5;
+        
+        // Covered call at slightly OTM
+        const callStrike = roundToStrike(stockPrice * 1.05);
+        const estimatedPremium = (stockPrice * currentIV / 100) * 0.08;
+        
+        return {
+            type: 'Covered Call',
+            dte: dte,
+            strikes: {
+                call: callStrike
+            },
+            estimatedPremium: Math.round(estimatedPremium * 100),
+            maxProfit: Math.round((callStrike - stockPrice + estimatedPremium) * 100),
+            maxLoss: 'Stock ownership risk',
+            breakeven: stockPrice - estimatedPremium,
+            annualizedReturn: Math.round((estimatedPremium / stockPrice) * (365 / dte) * 100),
+            targetProfit: '100%',
+            targetDays: dte,
+            note: 'Requires 100 shares of stock'
+        };
+    },
+    
+    /**
+     * Generate Long Straddle trade specifications
+     */
+    generateLongStraddle(stockPrice, currentIV) {
+        const dte = 45;
+        const roundToStrike = (price) => Math.round(price / 5) * 5;
+        
+        const strike = roundToStrike(stockPrice); // ATM
+        const estimatedDebit = (stockPrice * currentIV / 100) * 0.20;
+        
+        return {
+            type: 'Long Straddle',
+            dte: dte,
+            strikes: {
+                call: strike,
+                put: strike
+            },
+            estimatedDebit: Math.round(estimatedDebit * 100),
+            maxProfit: Infinity,
+            maxLoss: Math.round(estimatedDebit * 100),
+            breakevens: {
+                lower: strike - estimatedDebit,
+                upper: strike + estimatedDebit
+            },
+            targetProfit: '100%+',
+            targetDays: 30,
+            note: 'Benefits from volatility expansion or large move'
+        };
+    },
+    
+    /**
+     * Generate Calendar Spread trade specifications
+     */
+    generateCalendarSpread(stockPrice, currentIV) {
+        const shortDte = 30;
+        const longDte = 60;
+        const roundToStrike = (price) => Math.round(price / 5) * 5;
+        
+        const strike = roundToStrike(stockPrice); // ATM
+        const shortPremium = (stockPrice * currentIV / 100) * 0.06;
+        const longPremium = (stockPrice * currentIV / 100) * 0.10;
+        const estimatedDebit = longPremium - shortPremium;
+        
+        return {
+            type: 'Calendar Spread',
+            dte: {
+                short: shortDte,
+                long: longDte
+            },
+            strikes: {
+                both: strike
+            },
+            estimatedDebit: Math.round(estimatedDebit * 100),
+            maxProfit: Math.round((shortPremium * 1.5) * 100),
+            maxLoss: Math.round(estimatedDebit * 100),
+            targetProfit: '50%',
+            targetDays: shortDte,
+            note: 'Benefits from time decay and rising IV'
+        };
+    },
+    
+    /**
+     * Generate Butterfly Spread trade specifications
+     */
+    generateButterflySpread(stockPrice, currentIV) {
+        const dte = 35;
+        const roundToStrike = (price) => Math.round(price / 5) * 5;
+        
+        const atmStrike = roundToStrike(stockPrice);
+        const wing = roundToStrike(stockPrice * 0.05); // 5% wings
+        
+        const lowerStrike = atmStrike - wing;
+        const upperStrike = atmStrike + wing;
+        
+        const estimatedDebit = wing * 0.25;
+        
+        return {
+            type: 'Iron Butterfly',
+            dte: dte,
+            strikes: {
+                lowerWing: lowerStrike,
+                body: atmStrike,
+                upperWing: upperStrike
+            },
+            width: wing,
+            estimatedDebit: Math.round(estimatedDebit * 100),
+            maxProfit: Math.round((wing - estimatedDebit) * 100),
+            maxLoss: Math.round(estimatedDebit * 100),
+            breakevens: {
+                lower: atmStrike - (wing - estimatedDebit),
+                upper: atmStrike + (wing - estimatedDebit)
+            },
+            pop: 60,
+            targetProfit: '50%',
+            targetDays: 21,
+            note: 'Neutral strategy - benefits from low movement'
+        };
+    },
+    
+    /**
+     * Generate Debit Spread trade specifications (already exists, keeping here for completeness)
      */
     generateDebitSpread(stockPrice, currentIV) {
         const dte = 45; // Longer DTE for volatility expansion plays
