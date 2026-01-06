@@ -3,6 +3,14 @@
  * Coordinates all modules and handles UI interactions
  */
 
+// Suppress noisy browser extension frame errors
+window.addEventListener('error', function(e) {
+    if (e.message && e.message.includes('Frame') && e.message.includes('does not exist')) {
+        e.preventDefault();
+        return true;
+    }
+}, true);
+
 // Global state
 let currentTab = 'hotpicks';
 let activeStrategy = null;
@@ -12,7 +20,7 @@ let putCallChart = null;
  * Initialize application
  */
 async function init() {
-    console.log('Initializing Options Intelligence Platform...');
+    console.log('Initializing Options Intelligence Platform V7.0.8...');
     
     // Check data source and show banner
     checkDataSource();
