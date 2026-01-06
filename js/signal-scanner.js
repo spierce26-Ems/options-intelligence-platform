@@ -101,9 +101,9 @@ const SignalScanner = {
                 }
                 
                 // Rate limiting - UNLIMITED PLAN (Options Starter $29/mo)
-                // Much faster scanning with unlimited API calls!
-                // Reduced delay from 1000ms to 100ms for faster scans
-                await this.sleep(100);
+                // But respecting BURST limits to avoid temporary throttling
+                // Increased delay from 100ms to 500ms to avoid 429 errors
+                await this.sleep(500);
                 
                 // Light rate limit check (mainly for safety)
                 await this.checkRateLimit();
