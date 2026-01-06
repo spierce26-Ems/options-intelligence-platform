@@ -31,6 +31,8 @@
         </div>
     </nav>
 
+
+
     <!-- Main Content -->
     <main class="main-content">
         <div class="container">
@@ -154,7 +156,7 @@
                 </div>
 
                 <!-- Search Box -->
-                <div class="card">
+                <div class="ios-card ticker-search-box">
                     <div class="search-container">
                         <input 
                             type="text" 
@@ -163,22 +165,22 @@
                             class="ticker-input"
                             onkeypress="if(event.key==='Enter') searchTicker()"
                         />
-                        <button class="button button-primary" onclick="searchTicker()">
+                        <button class="search-btn" onclick="searchTicker()">
                             <i class="fas fa-search"></i> Analyze
                         </button>
                     </div>
                     <div class="search-hints">
                         <strong>Popular tickers:</strong>
-                        <button class="example-chip" onclick="document.getElementById('tickerSearchInput').value='AAPL'; searchTicker()">AAPL</button>
-                        <button class="example-chip" onclick="document.getElementById('tickerSearchInput').value='TSLA'; searchTicker()">TSLA</button>
-                        <button class="example-chip" onclick="document.getElementById('tickerSearchInput').value='NVDA'; searchTicker()">NVDA</button>
-                        <button class="example-chip" onclick="document.getElementById('tickerSearchInput').value='SPY'; searchTicker()">SPY</button>
-                        <button class="example-chip" onclick="document.getElementById('tickerSearchInput').value='QQQ'; searchTicker()">QQQ</button>
+                        <button class="hint-btn" onclick="document.getElementById('tickerSearchInput').value='AAPL'; searchTicker()">AAPL</button>
+                        <button class="hint-btn" onclick="document.getElementById('tickerSearchInput').value='TSLA'; searchTicker()">TSLA</button>
+                        <button class="hint-btn" onclick="document.getElementById('tickerSearchInput').value='NVDA'; searchTicker()">NVDA</button>
+                        <button class="hint-btn" onclick="document.getElementById('tickerSearchInput').value='SPY'; searchTicker()">SPY</button>
+                        <button class="hint-btn" onclick="document.getElementById('tickerSearchInput').value='QQQ'; searchTicker()">QQQ</button>
                     </div>
                 </div>
 
                 <!-- Data Source Info -->
-                <div class="card">
+                <div class="ios-card data-source-info">
                     <h3><i class="fas fa-database"></i> Data Source Configuration</h3>
                     <p class="info-text">
                         <strong>Current Status:</strong> <span id="dataSourceStatus">Using simulated data</span>
@@ -191,7 +193,7 @@
                             <option value="yahoo">Yahoo Finance (Free, Limited)</option>
                             <option value="tradier">Tradier (Free Sandbox)</option>
                             <option value="tdameritrade">TD Ameritrade (Free)</option>
-                            <option value="polygon">Polygon.io ($49/mo)</option>
+                            <option value="polygon">Massive.com ($49/mo)</option>
                         </select>
                         <input 
                             type="text" 
@@ -199,7 +201,7 @@
                             placeholder="Enter API key (leave empty for Yahoo)" 
                             class="api-input"
                         />
-                        <button class="button button-primary" onclick="configureAPI()">
+                        <button class="action-btn primary" onclick="configureAPI()">
                             <i class="fas fa-plug"></i> Connect
                         </button>
                     </div>
@@ -209,17 +211,17 @@
                             <li><strong>Yahoo Finance:</strong> No key needed, but limited data</li>
                             <li><strong>Tradier:</strong> Free sandbox at <a href="https://tradier.com" target="_blank">tradier.com</a></li>
                             <li><strong>TD Ameritrade:</strong> Free with account at <a href="https://developer.tdameritrade.com" target="_blank">developer.tdameritrade.com</a></li>
-                            <li><strong>Polygon.io:</strong> Paid plans at <a href="https://polygon.io" target="_blank">polygon.io</a></li>
+                            <li><strong>Massive.com:</strong> Paid plans at <a href="https://massive.com" target="_blank">massive.com</a> (formerly Polygon.io)</li>
                         </ul>
                     </details>
                 </div>
 
                 <!-- Analysis Results -->
                 <div id="tickerAnalysisResults">
-                    <div class="empty-state">
-                        <div class="empty-icon">🔍</div>
-                        <h3 class="empty-title">Enter a ticker symbol above to start analyzing</h3>
-                        <p class="empty-description">Get comprehensive options analysis for any stock</p>
+                    <div class="empty-state-ticker">
+                        <i class="fas fa-search-dollar"></i>
+                        <h3>Enter a ticker symbol above to start analyzing</h3>
+                        <p>Get comprehensive options analysis for any stock</p>
                     </div>
                 </div>
             </div>
@@ -283,7 +285,7 @@
                             </select>
                         </div>
                     </div>
-                    <button class="button button-primary" id="scanBtn">
+                    <button class="btn btn-primary" id="scanBtn">
                         <i class="fas fa-sync"></i> Scan Options
                     </button>
                 </div>
@@ -292,10 +294,7 @@
                 <div class="card">
                     <h3><i class="fas fa-trophy"></i> Top Opportunities Today</h3>
                     <div id="topOpportunities" class="opportunities-grid">
-                        <div class="loading-state">
-                            <div class="loading-spinner"></div>
-                            <p>Scanning options chains...</p>
-                        </div>
+                        <div class="loading">Scanning options chains...</div>
                     </div>
                 </div>
 
@@ -342,10 +341,7 @@
                     <div class="card signal-card">
                         <h3><i class="fas fa-fire"></i> Unusual Options Activity</h3>
                         <div class="signal-list" id="unusualActivity">
-                            <div class="loading-state">
-                                <div class="loading-spinner"></div>
-                                <p>Loading signals...</p>
-                            </div>
+                            <div class="loading">Loading signals...</div>
                         </div>
                     </div>
 
@@ -353,10 +349,7 @@
                     <div class="card signal-card">
                         <h3><i class="fas fa-bolt"></i> Volatility Signals</h3>
                         <div class="signal-list" id="volatilitySignals">
-                            <div class="loading-state">
-                                <div class="loading-spinner"></div>
-                                <p>Loading signals...</p>
-                            </div>
+                            <div class="loading">Loading signals...</div>
                         </div>
                     </div>
 
@@ -364,10 +357,7 @@
                     <div class="card signal-card">
                         <h3><i class="fas fa-calendar-alt"></i> Earnings Plays</h3>
                         <div class="signal-list" id="earningsPlays">
-                            <div class="loading-state">
-                                <div class="loading-spinner"></div>
-                                <p>Loading signals...</p>
-                            </div>
+                            <div class="loading">Loading signals...</div>
                         </div>
                     </div>
 
@@ -375,10 +365,7 @@
                     <div class="card signal-card">
                         <h3><i class="fas fa-chart-bar"></i> Technical Signals</h3>
                         <div class="signal-list" id="technicalSignals">
-                            <div class="loading-state">
-                                <div class="loading-spinner"></div>
-                                <p>Loading signals...</p>
-                            </div>
+                            <div class="loading">Loading signals...</div>
                         </div>
                     </div>
                 </div>
@@ -502,7 +489,7 @@
                                 <span class="value">Sideways/Slight Trend</span>
                             </div>
                         </div>
-                        <button class="button button-secondary" onclick="showStrategy('credit-spread')">
+                        <button class="btn btn-secondary" onclick="showStrategy('credit-spread')">
                             View Opportunities
                         </button>
                     </div>
@@ -520,7 +507,7 @@
                                 <span class="value">Low Volatility</span>
                             </div>
                         </div>
-                        <button class="button button-secondary" onclick="showStrategy('iron-condor')">
+                        <button class="btn btn-secondary" onclick="showStrategy('iron-condor')">
                             View Opportunities
                         </button>
                     </div>
@@ -538,7 +525,7 @@
                                 <span class="value">Earnings/Events</span>
                             </div>
                         </div>
-                        <button class="button button-secondary" onclick="showStrategy('straddle')">
+                        <button class="btn btn-secondary" onclick="showStrategy('straddle')">
                             View Opportunities
                         </button>
                     </div>
@@ -556,7 +543,7 @@
                                 <span class="value">Neutral Outlook</span>
                             </div>
                         </div>
-                        <button class="button button-secondary" onclick="showStrategy('calendar-spread')">
+                        <button class="btn btn-secondary" onclick="showStrategy('calendar-spread')">
                             View Opportunities
                         </button>
                     </div>
@@ -574,7 +561,7 @@
                                 <span class="value">Strong Trend</span>
                             </div>
                         </div>
-                        <button class="button button-secondary" onclick="showStrategy('debit-spread')">
+                        <button class="btn btn-secondary" onclick="showStrategy('debit-spread')">
                             View Opportunities
                         </button>
                     </div>
@@ -592,7 +579,7 @@
                                 <span class="value">Low IV + Target</span>
                             </div>
                         </div>
-                        <button class="button button-secondary" onclick="showStrategy('butterfly')">
+                        <button class="btn btn-secondary" onclick="showStrategy('butterfly')">
                             View Opportunities
                         </button>
                     </div>
@@ -759,7 +746,7 @@
                             <input type="number" id="posQuantity" placeholder="Contracts" value="1">
                             <input type="number" id="posPremium" placeholder="Premium Paid" step="0.01">
                         </div>
-                        <button class="button button-primary" onclick="addPosition()">
+                        <button class="btn btn-primary" onclick="addPosition()">
                             <i class="fas fa-plus"></i> Add Position
                         </button>
                     </div>
@@ -834,17 +821,15 @@
     <script src="js/technical-confluence.js"></script>
     <script src="js/master-intelligence.js"></script>
     
-    <!-- Corporate Calendar & Intelligent Screening -->
+    <!-- NEW: Corporate Calendar & Intelligent Screening -->
     <script src="js/corporate-calendar.js"></script>
     <script src="js/intelligent-screener.js"></script>
     
     <script src="js/enhanced-hotpicks.js"></script>
+    <script src="js/enhanced-hotpicks-ui.js"></script>
+    <script src="js/demo-interface.js"></script>
     
-    <!-- V7: DISABLED OLD UI - These conflict with V7 design -->
-    <!-- <script src="js/enhanced-hotpicks-ui.js"></script> -->
-    <!-- <script src="js/demo-interface.js"></script> -->
-    
-    <!-- V7 UI Adapter - MUST load after intelligence modules -->
+    <!-- V7 UI Adapter -->
     <script src="js/v7-hotpicks-adapter.js"></script>
     
     <script src="js/main.js"></script>
