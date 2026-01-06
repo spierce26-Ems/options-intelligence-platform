@@ -161,21 +161,25 @@ const BacktestEngine = {
         
         // Try to get REAL data from Massive.com first
         if (window.MassiveHistoricalData && MassiveHistoricalData.isConfigured()) {
-            console.log(`   🌐 Using REAL data from Massive.com API...`);
+            console.log(`   🌐 Attempting to fetch REAL data from Massive.com API...`);
             
             const realData = await MassiveHistoricalData.buildHistoricalDataset(symbol, startDate, endDate);
             
             if (realData && realData.length > 0) {
-                console.log(`   ✅ Got ${realData.length} days of REAL market data`);
+                console.log(`   ✅✅✅ SUCCESS: Got ${realData.length} days of REAL market data from Massive.com`);
+                console.log(`   📊 DATA SOURCE: REAL MARKET DATA`);
                 return realData;
             } else {
-                console.warn(`   ⚠️ Could not fetch real data, falling back to simulation`);
+                console.warn(`   ❌ REAL DATA FAILED: Could not fetch from Massive.com API`);
+                console.warn(`   ⚠️⚠️⚠️ FALLING BACK TO SIMULATED DATA - RESULTS WILL BE UNREALISTIC`);
             }
         } else {
-            console.log(`   ⚠️ Massive.com API not configured, using simulated data`);
+            console.error(`   ❌ Massive.com API NOT CONFIGURED`);
+            console.warn(`   ⚠️⚠️⚠️ USING SIMULATED DATA - RESULTS ARE NOT REAL`);
         }
         
         // Fallback to simulated data
+        console.log(`   🎭 DATA SOURCE: SIMULATED (FAKE) DATA`);
         return this.generateSimulatedData(symbol, startDate, endDate);
     },
     
