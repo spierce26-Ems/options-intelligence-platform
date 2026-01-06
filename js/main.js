@@ -711,15 +711,26 @@ window.showStrategy = showStrategy;
 function updateMarketStatus() {
     const status = OptionsData.getMarketStatus();
     const statusEl = document.getElementById('marketStatus');
+    
+    if (!statusEl) return; // Exit if element doesn't exist
+    
     const dot = statusEl.querySelector('.status-dot');
-    const text = statusEl.querySelector('.status-text');
+    const textSpans = statusEl.querySelectorAll('span:not(.status-dot)');
+    const text = textSpans.length > 0 ? textSpans[0] : null;
     
-    text.textContent = status.status;
-    dot.className = 'status-dot ' + (status.isOpen ? 'open' : 'closed');
+    if (text) {
+        text.textContent = status.status;
+    }
     
-    // Update last updated time
-    document.getElementById('lastUpdated').textContent = 
-        'Last Updated: ' + new Date().toLocaleTimeString();
+    if (dot) {
+        dot.className = 'status-dot ' + (status.isOpen ? 'open' : 'closed');
+    }
+    
+    // Update last updated time if element exists
+    const lastUpdatedEl = document.getElementById('lastUpdated');
+    if (lastUpdatedEl) {
+        lastUpdatedEl.textContent = 'Last Updated: ' + new Date().toLocaleTimeString();
+    }
 }
 
 /**
@@ -764,7 +775,7 @@ function checkDataSource() {
     if (hasRealData) {
         // Determine which API is active
         let activeAPI = 'Unknown';
-        if (RealTimeData.apis.polygon.enabled) activeAPI = 'Polygon.io';
+        if (RealTimeData.apis.polygon.enabled) activeAPI = 'Massive.com';
         else if (RealTimeData.apis.tradier.enabled) activeAPI = 'Tradier';
         else if (RealTimeData.apis.yahoo.enabled) activeAPI = 'Yahoo Finance';
         
