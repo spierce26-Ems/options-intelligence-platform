@@ -40,11 +40,12 @@ async function init() {
  * Setup tab navigation
  */
 function setupTabNavigation() {
-    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabButtons = document.querySelectorAll('.nav-item');
     const tabContents = document.querySelectorAll('.tab-content');
     
     tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
             const targetTab = button.getAttribute('data-tab');
             
             // Remove active class from all tabs
@@ -53,7 +54,10 @@ function setupTabNavigation() {
             
             // Add active class to clicked tab
             button.classList.add('active');
-            document.getElementById(targetTab).classList.add('active');
+            const targetContent = document.getElementById(targetTab);
+            if (targetContent) {
+                targetContent.classList.add('active');
+            }
             
             currentTab = targetTab;
             
@@ -709,6 +713,8 @@ window.showStrategy = showStrategy;
  * Update market status
  */
 function updateMarketStatus() {
+    if (!window.OptionsData) return;
+    
     const status = OptionsData.getMarketStatus();
     const statusEl = document.getElementById('marketStatus');
     
@@ -725,6 +731,9 @@ function updateMarketStatus() {
     if (dot) {
         dot.className = 'status-dot ' + (status.isOpen ? 'open' : 'closed');
     }
+    
+    // Update status indicator class
+    statusEl.className = 'status-indicator ' + (status.isOpen ? 'status-positive' : 'status-neutral');
     
     // Update last updated time if element exists
     const lastUpdatedEl = document.getElementById('lastUpdated');
