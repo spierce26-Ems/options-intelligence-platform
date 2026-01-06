@@ -86,21 +86,34 @@ function setupEventListeners() {
 async function loadInitialData() {
     console.log('Loading initial data...');
     
-    // Initialize Hot Picks first
-    await initHotPicks();
+    // V7: Hot Picks initialized by V7HotPicksAdapter
+    // await initHotPicks(); // OLD - disabled
     
-    // Generate signals
-    await SignalsEngine.generateAllSignals();
+    try {
+        // Generate signals
+        console.log('📡 Starting signals generation...');
+        await SignalsEngine.generateAllSignals();
+        console.log('✅ Signals generated:', SignalsEngine.signals.length);
+        
+        // Update signals tab
+        updateSignalsDisplay();
+        console.log('✅ Signals display updated');
+        
+        // Show top opportunities
+        showTopOpportunities();
+        console.log('✅ Top opportunities displayed');
+    } catch (error) {
+        console.error('❌ Error loading signals:', error);
+    }
     
-    // Update signals tab
-    updateSignalsDisplay();
-    
-    // Show top opportunities
-    showTopOpportunities();
-    
-    // Update portfolio
-    await Portfolio.updatePositions();
-    updatePortfolioDisplay();
+    try {
+        // Update portfolio
+        await Portfolio.updatePositions();
+        updatePortfolioDisplay();
+        console.log('✅ Portfolio updated');
+    } catch (error) {
+        console.error('❌ Error loading portfolio:', error);
+    }
 }
 
 /**
@@ -109,7 +122,8 @@ async function loadInitialData() {
 async function loadTabData(tab) {
     switch (tab) {
         case 'hotpicks':
-            await initHotPicks();
+            // V7: Handled by V7HotPicksAdapter
+            // await initHotPicks(); // OLD - disabled
             break;
         case 'scanner':
             // Scanner loads on demand
@@ -251,10 +265,17 @@ function updateSignalsDisplay() {
  */
 function updateSignalCategory(elementId, signalType) {
     const container = document.getElementById(elementId);
+    
+    // Safety check
+    if (!container) {
+        console.warn(`⚠️ Signal container not found: ${elementId}`);
+        return;
+    }
+    
     const signals = SignalsEngine.getSignalsByType(signalType);
     
-    if (signals.length === 0) {
-        container.innerHTML = '<div class="empty-state">No signals</div>';
+    if (!signals || signals.length === 0) {
+        container.innerHTML = '<div class="empty-state">No signals found. Generate signals to see opportunities.</div>';
         return;
     }
     
@@ -272,6 +293,8 @@ function updateSignalCategory(elementId, signalType) {
         `;
         container.appendChild(item);
     }
+    
+    console.log(`✅ Updated ${signalType} signals: ${signals.length} found`);
 }
 
 /**
