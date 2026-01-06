@@ -154,12 +154,39 @@ const BacktestEngine = {
     
     /**
      * Generate historical data for backtesting
+     * Now uses REAL data from Massive.com API when available
      */
     async generateHistoricalData(symbol, startDate, endDate) {
+        console.log(`   📥 Fetching historical data for ${symbol}...`);
+        
+        // Try to get REAL data from Massive.com first
+        if (window.MassiveHistoricalData && MassiveHistoricalData.isConfigured()) {
+            console.log(`   🌐 Using REAL data from Massive.com API...`);
+            
+            const realData = await MassiveHistoricalData.buildHistoricalDataset(symbol, startDate, endDate);
+            
+            if (realData && realData.length > 0) {
+                console.log(`   ✅ Got ${realData.length} days of REAL market data`);
+                return realData;
+            } else {
+                console.warn(`   ⚠️ Could not fetch real data, falling back to simulation`);
+            }
+        } else {
+            console.log(`   ⚠️ Massive.com API not configured, using simulated data`);
+        }
+        
+        // Fallback to simulated data
+        return this.generateSimulatedData(symbol, startDate, endDate);
+    },
+    
+    /**
+     * Generate simulated data (fallback when API not available)
+     */
+    async generateSimulatedData(symbol, startDate, endDate) {
         const data = [];
         const days = Math.floor((endDate - startDate) / (24 * 60 * 60 * 1000));
         
-        console.log(`   📥 Generating ${days} days of historical data...`);
+        console.log(`   📥 Generating ${days} days of SIMULATED data...`);
         
         // Get current price as anchor
         const currentPrice = await RealTimeData.getStockPrice(symbol);
