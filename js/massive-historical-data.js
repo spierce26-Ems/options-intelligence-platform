@@ -64,7 +64,13 @@ const MassiveHistoricalData = {
             const response = await fetch(url);
             
             if (!response.ok) {
-                const errorText = await response.text();
+                let errorText = '';
+                try {
+                    errorText = await response.text();
+                } catch (e) {
+                    errorText = 'Could not read error response';
+                }
+                
                 console.error(`❌ Massive.com API Error (${response.status}):`, errorText);
                 
                 if (response.status === 401) {
@@ -72,10 +78,22 @@ const MassiveHistoricalData = {
                     console.error('   → Check your API key at https://massive.com/dashboard');
                 } else if (response.status === 429) {
                     console.error('   ⏱️ Rate Limit Exceeded');
-                    console.error('   → Free tier: 5 calls/minute. Wait 60 seconds.');
+                    console.error('   → Options Starter Plan: UNLIMITED calls/minute');
+                    console.error('   → If seeing this, may be temporary throttle. Wait 60 seconds.');
                 } else if (response.status === 403) {
-                    console.error('   🚫 Access Forbidden');
-                    console.error('   → Your plan may not include historical data access');
+                    console.error('   🚫 Access Forbidden - Free Tier Limitation');
+                    console.error('   → Historical aggregates require paid plan ($49+/month)');
+                    console.error('   → Upgrade at: https://polygon.io/pricing');
+                } else if (response.status === 404) {
+                    console.error('   🚫 Endpoint Not Found - FREE TIER LIMITATION');
+                    console.error('   → /v2/aggs endpoint requires PAID plan');
+                    console.error('   → Free tier only includes: quotes, trades, ticker data');
+                    console.error('   → Historical data requires Starter plan ($49/month) or higher');
+                    console.error('   → Upgrade at: https://polygon.io/pricing');
+                    console.error('   ');
+                    console.error('   💡 SOLUTION: Falling back to simulated data for backtesting');
+                    console.error('   → For real trading, use current IV (free tier supports this)');
+                    console.error('   → Or upgrade to paid plan for historical backtesting');
                 }
                 
                 return null;
