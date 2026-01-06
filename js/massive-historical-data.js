@@ -12,7 +12,10 @@
 
 const MassiveHistoricalData = {
     // Configuration
-    apiKey: RealTimeData?.apis?.polygon?.apiKey || '',
+    get apiKey() {
+        // Read API key dynamically from RealTimeData
+        return RealTimeData?.apis?.polygon?.apiKey || '';
+    },
     baseUrl: 'https://api.polygon.io',
     cache: {},
     
@@ -20,10 +23,16 @@ const MassiveHistoricalData = {
      * Check if API is configured
      */
     isConfigured() {
-        const hasKey = this.apiKey && this.apiKey.length > 10 && this.apiKey !== 'YOUR_NEW_API_KEY_HERE';
+        const key = this.apiKey;
+        const hasKey = key && key.length > 10 && key !== 'YOUR_NEW_API_KEY_HERE';
+        
         if (!hasKey) {
             console.warn('⚠️ Massive.com API key not configured. Using simulated data.');
+            console.warn(`   Current key: "${key}" (length: ${key?.length || 0})`);
+        } else {
+            console.log('✅ Massive.com API key configured:', key.substring(0, 8) + '...' + key.substring(key.length - 4));
         }
+        
         return hasKey;
     },
     
@@ -56,7 +65,19 @@ const MassiveHistoricalData = {
             
             if (!response.ok) {
                 const errorText = await response.text();
-                console.error(`❌ API Error (${response.status}):`, errorText);
+                console.error(`❌ Massive.com API Error (${response.status}):`, errorText);
+                
+                if (response.status === 401) {
+                    console.error('   🔑 API Key Authentication Failed');
+                    console.error('   → Check your API key at https://massive.com/dashboard');
+                } else if (response.status === 429) {
+                    console.error('   ⏱️ Rate Limit Exceeded');
+                    console.error('   → Free tier: 5 calls/minute. Wait 60 seconds.');
+                } else if (response.status === 403) {
+                    console.error('   🚫 Access Forbidden');
+                    console.error('   → Your plan may not include historical data access');
+                }
+                
                 return null;
             }
             
