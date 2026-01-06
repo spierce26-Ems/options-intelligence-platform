@@ -258,6 +258,8 @@ const MassiveHistoricalData = {
                     
                     if (maxIV > minIV) {
                         ivRank = ((realizedVol - minIV) / (maxIV - minIV)) * 100;
+                        // Clamp to 0-100 range
+                        ivRank = Math.max(0, Math.min(100, ivRank));
                     }
                 }
             }
