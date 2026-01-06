@@ -35,7 +35,7 @@ const RealTimeData = {
     // RATE LIMITING - Track API calls to prevent exhaustion
     rateLimiter: {
         calls: [],
-        maxCallsPerMinute: 5, // Free tier limit
+        maxCallsPerMinute: 1000, // UNLIMITED PLAN (Options Starter $29/mo) - High limit for safety
         lastWarning: 0
     },
     
