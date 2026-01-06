@@ -168,11 +168,11 @@ const MassiveHistoricalData = {
             // Average IV of ATM options
             const avgIV = atmOptions.reduce((sum, opt) => {
                 const iv = opt.implied_volatility || 0.30;
-                return sum + (iv * 100);
+                return sum + iv;  // Don't multiply by 100 here - already handled below
             }, 0) / atmOptions.length;
             
             return {
-                iv: Math.round(avgIV * 10) / 10,
+                iv: Math.round(avgIV * 100 * 10) / 10,  // Convert to percentage here
                 price: stockPrice,
                 date: date
             };
