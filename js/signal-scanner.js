@@ -11,14 +11,45 @@
 
 const SignalScanner = {
     // Default watchlist (can be customized)
+    // EXPANDED for Starter Plan users with higher API limits
     watchlist: [
-        'SPY', 'QQQ', 'IWM',           // Index ETFs
-        'AAPL', 'MSFT', 'GOOGL',       // Tech mega-caps
-        'TSLA', 'NVDA', 'AMD',         // High volatility tech
-        'JPM', 'BAC', 'GS',            // Financials
-        'XLE', 'XLF', 'XLK',           // Sector ETFs
-        'CSX', 'UNP', 'NSC',           // Industrials
-        'DIS', 'NFLX', 'META'          // Media/Social
+        // Major Index ETFs (5)
+        'SPY', 'QQQ', 'IWM', 'DIA', 'VTI',
+        
+        // Tech Mega-Caps (10) - High liquidity
+        'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META',
+        'NVDA', 'TSLA', 'AMD', 'NFLX', 'CRM',
+        
+        // High Volatility Tech (8) - More opportunities
+        'COIN', 'SHOP', 'SQ', 'PYPL', 'ROKU',
+        'SNAP', 'UBER', 'LYFT',
+        
+        // Financials (6)
+        'JPM', 'BAC', 'GS', 'C', 'WFC', 'MS',
+        
+        // Healthcare (5)
+        'UNH', 'JNJ', 'PFE', 'ABBV', 'LLY',
+        
+        // Consumer (5)
+        'WMT', 'HD', 'NKE', 'SBUX', 'MCD',
+        
+        // Energy (5)
+        'XOM', 'CVX', 'XLE', 'OXY', 'SLB',
+        
+        // Industrials (5) - Validated CSX
+        'CSX', 'UNP', 'NSC', 'CAT', 'BA',
+        
+        // Sector ETFs (6)
+        'XLF', 'XLK', 'XLV', 'XLY', 'XLP', 'XLI',
+        
+        // Semiconductors (5)
+        'INTC', 'MU', 'AVGO', 'QCOM', 'TSM',
+        
+        // Communication (4)
+        'DIS', 'CMCSA', 'VZ', 'T',
+        
+        // Emerging/High Vol (6)
+        'RIVN', 'LCID', 'PLTR', 'SOFI', 'AFRM', 'HOOD'
     ],
     
     // Backtest results (from validation)
@@ -54,8 +85,9 @@ const SignalScanner = {
                     signals.push(signal);
                 }
                 
-                // Rate limiting - wait 200ms between calls
-                await this.sleep(200);
+                // Rate limiting - Starter plan has 100 calls/min
+                // Reduced delay from 200ms to 50ms (12 stocks/min → 48 stocks/min)
+                await this.sleep(50);
                 
             } catch (error) {
                 console.error(`   ❌ Error scanning ${symbol}:`, error.message);
@@ -153,6 +185,7 @@ const SignalScanner = {
     
     /**
      * Calculate IV Rank (needs historical IV data)
+     * ENHANCED for Starter Plan with full historical data access
      */
     async calculateIVRank(symbol, currentIV) {
         // Try to get historical IV from Massive.com
@@ -169,15 +202,18 @@ const SignalScanner = {
                 
                 if (historicalData && historicalData.length > 30) {
                     // Calculate IV Rank from historical data
-                    return IVRankEngine.calculateIVRank(symbol, currentIV, historicalData);
+                    const rank = IVRankEngine.calculateIVRank(symbol, currentIV, historicalData);
+                    console.log(`   ${symbol}: IV Rank ${rank}% (calculated from ${historicalData.length} days)`);
+                    return rank;
                 }
             } catch (error) {
-                console.warn(`   ⚠️ ${symbol}: Could not get historical IV, using estimate`);
+                console.warn(`   ⚠️ ${symbol}: Could not get historical IV:`, error.message);
             }
         }
         
         // Fallback: Estimate IV Rank based on current IV
-        // Typical IV ranges: 15-25 (low), 25-40 (medium), 40+ (high)
+        // This is less accurate but works when API limits hit
+        console.warn(`   ⚠️ ${symbol}: Using estimated IV Rank (no historical data)`);
         if (currentIV < 20) return 10;
         if (currentIV < 25) return 30;
         if (currentIV < 35) return 50;
