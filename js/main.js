@@ -842,22 +842,42 @@ function checkDataSource() {
     const banner = document.getElementById('dataSourceBanner');
     const bannerText = document.getElementById('dataSourceText');
     
+    console.log('🔍 Checking data source...');
+    console.log('RealTimeData available:', !!window.RealTimeData);
+    
+    if (window.RealTimeData) {
+        console.log('Polygon enabled:', RealTimeData.apis.polygon.enabled);
+        console.log('Polygon API key:', RealTimeData.apis.polygon.apiKey ? 'SET' : 'NOT SET');
+        console.log('Tradier enabled:', RealTimeData.apis.tradier.enabled);
+        console.log('Yahoo enabled:', RealTimeData.apis.yahoo.enabled);
+    }
+    
     // Check if RealTimeData is available and configured
-    const hasRealData = window.RealTimeData && (
-        RealTimeData.apis.polygon.enabled ||
-        RealTimeData.apis.tradier.enabled ||
-        RealTimeData.apis.yahoo.enabled
-    );
+    const hasPolygon = window.RealTimeData && 
+                      RealTimeData.apis.polygon.enabled && 
+                      RealTimeData.apis.polygon.apiKey && 
+                      RealTimeData.apis.polygon.apiKey.length > 10;
+    
+    const hasTradier = window.RealTimeData && 
+                       RealTimeData.apis.tradier.enabled && 
+                       RealTimeData.apis.tradier.apiKey;
+    
+    const hasRealData = hasPolygon || hasTradier;
     
     if (hasRealData) {
         // Determine which API is active
         let activeAPI = 'Unknown';
-        if (RealTimeData.apis.polygon.enabled) activeAPI = 'Massive.com';
-        else if (RealTimeData.apis.tradier.enabled) activeAPI = 'Tradier';
-        else if (RealTimeData.apis.yahoo.enabled) activeAPI = 'Yahoo Finance';
+        if (hasPolygon) {
+            activeAPI = 'Massive.com';
+            console.log('✅ Massive.com API is ENABLED and CONFIGURED');
+        }
+        else if (hasTradier) {
+            activeAPI = 'Tradier';
+            console.log('✅ Tradier API is ENABLED');
+        }
         
         banner.className = 'data-source-banner real-data';
-        bannerText.innerHTML = `<strong>✓ LIVE DATA MODE</strong> - Using real market data from ${activeAPI}`;
+        bannerText.innerHTML = `<strong>✓ LIVE DATA MODE</strong> - Using real-time data from ${activeAPI}`;
         banner.style.display = 'block';
         
         console.log(`✅ Using REAL data from ${activeAPI}`);
@@ -868,6 +888,7 @@ function checkDataSource() {
         banner.style.display = 'block';
         
         console.warn('⚠️ Using SIMULATED data - configure API keys for real data');
+        console.log('Reason: Polygon enabled =', RealTimeData?.apis?.polygon?.enabled, ', Has key =', !!(RealTimeData?.apis?.polygon?.apiKey));
     }
 }
 
