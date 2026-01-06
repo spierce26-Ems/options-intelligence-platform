@@ -8,7 +8,7 @@ const RealTimeData = {
     apis: {
         polygon: {
             enabled: false, // Disabled - use Yahoo Finance instead
-            apiKey: '', // Wrong key format (Finnhub, not Polygon/Massive)
+            apiKey: 'i4uMiWTkCkQqeUwrFpUJpCwbOXfh5k4b', // Wrong key format (Finnhub, not Polygon/Massive)
             baseUrl: 'https://api.polygon.io'
         },
         tradier: {
