@@ -11,15 +11,25 @@ const SignalsEngine = {
      * Generate all trading signals
      */
     async generateAllSignals(stocks = OptionsData.ROBINHOOD_STOCKS) {
-        console.log('Generating signals for', stocks.length, 'stocks...');
+        console.log('🔄 Starting signals generation for', stocks.length, 'stocks...');
         this.signals = [];
+        
+        let processedCount = 0;
+        let errorCount = 0;
         
         for (const symbol of stocks.slice(0, 50)) { // Limit to first 50 for performance
             try {
                 const stockPrice = await OptionsData.getStockPrice(symbol);
-                if (!stockPrice) continue;
+                if (!stockPrice) {
+                    console.log(`⚠️ No price for ${symbol}, skipping`);
+                    continue;
+                }
                 
                 const optionsChain = OptionsData.generateOptionsChain(symbol, stockPrice);
+                if (!optionsChain || optionsChain.length === 0) {
+                    console.log(`⚠️ No options chain for ${symbol}, skipping`);
+                    continue;
+                }
                 
                 // Run all signal detectors
                 this.detectUnusualActivity(symbol, optionsChain, stockPrice);
@@ -30,13 +40,25 @@ const SignalsEngine = {
                 this.detectGreekOpportunities(symbol, optionsChain, stockPrice);
                 this.detectArbitrageOpportunities(symbol, optionsChain, stockPrice);
                 
+                processedCount++;
+                
             } catch (error) {
-                console.log(`Error generating signals for ${symbol}:`, error);
+                errorCount++;
+                console.error(`❌ Error generating signals for ${symbol}:`, error);
             }
         }
         
         // Sort signals by strength
         this.signals.sort((a, b) => b.strength - a.strength);
+        
+        console.log(`✅ Signals generation complete:`);
+        console.log(`   - Processed: ${processedCount} stocks`);
+        console.log(`   - Errors: ${errorCount}`);
+        console.log(`   - Total signals: ${this.signals.length}`);
+        console.log(`   - Unusual: ${this.getSignalsByType('unusual').length}`);
+        console.log(`   - Volatility: ${this.getSignalsByType('volatility').length}`);
+        console.log(`   - Earnings: ${this.getSignalsByType('earnings').length}`);
+        console.log(`   - Technical: ${this.getSignalsByType('technical').length}`);
         
         return this.signals;
     },
