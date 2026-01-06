@@ -156,6 +156,29 @@
         <h1>🎯 Backtest: IV Rank Mean Reversion</h1>
         <p class="subtitle">Test your strategy on historical data before risking real money</p>
         
+        <!-- Data Source Warning (will be updated by JS) -->
+        <div id="dataSourceWarning" style="
+            padding: 16px;
+            margin: 16px 0;
+            background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+            border-radius: 8px;
+            border-left: 4px solid #ff0000;
+            display: none;
+        ">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 24px;">⚠️</span>
+                <div>
+                    <div style="font-weight: 600; font-size: 16px; margin-bottom: 4px;">
+                        USING SIMULATED DATA
+                    </div>
+                    <div style="font-size: 14px; opacity: 0.9;">
+                        Results are NOT from real market data and will be unrealistically good.
+                        Win rates will be 2-3x higher than reality.
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <div class="controls">
             <div class="control-group">
                 <label>Stock Symbol</label>
@@ -193,8 +216,25 @@
     <script src="js/realtime-data.js"></script>
     <script src="js/data.js"></script>
     <script src="js/calculations.js"></script>
+    <script src="js/massive-historical-data.js"></script>
     <script src="js/iv-rank-engine.js"></script>
     <script src="js/backtest-engine.js"></script>
+    
+    <script>
+        // Check data source on page load
+        window.addEventListener('load', () => {
+            const warning = document.getElementById('dataSourceWarning');
+            
+            if (window.MassiveHistoricalData && MassiveHistoricalData.isConfigured()) {
+                console.log('✅ Massive.com API configured - will attempt to use REAL data');
+                warning.style.display = 'none';
+            } else {
+                console.error('❌ Massive.com API NOT configured - using SIMULATED data');
+                console.error('⚠️ Backtest results will be unrealistically good!');
+                warning.style.display = 'block';
+            }
+        });
+    </script>
     
     <script>
         document.getElementById('runBacktest').addEventListener('click', async () => {
