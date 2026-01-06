@@ -583,7 +583,7 @@
                         <button class="btn" onclick='openPosition(${JSON.stringify(signal)})'>
                             Enter Trade
                         </button>
-                        <button class="btn-secondary btn" onclick="viewDetails('${signal.symbol}')">
+                        <button class="btn-secondary btn" onclick='viewDetails(${JSON.stringify(signal)})'>
                             View Details
                         </button>
                     </div>
@@ -776,8 +776,190 @@
         }
 
         // View details (link to analysis page)
-        function viewDetails(symbol) {
-            window.location.href = `index.html?symbol=${symbol}`;
+        function viewDetails(signal) {
+            // Create modal with detailed signal information
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.9);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                padding: 20px;
+            `;
+            
+            const content = document.createElement('div');
+            content.style.cssText = `
+                background: #111;
+                border: 1px solid #333;
+                border-radius: 12px;
+                padding: 30px;
+                max-width: 800px;
+                width: 100%;
+                max-height: 90vh;
+                overflow-y: auto;
+                position: relative;
+            `;
+            
+            // Build trade details
+            const trade = signal.trade || {};
+            const strikes = trade.strikes || {};
+            
+            content.innerHTML = `
+                <button onclick="this.parentElement.parentElement.remove()" style="
+                    position: absolute;
+                    top: 20px;
+                    right: 20px;
+                    background: #222;
+                    border: none;
+                    color: #fff;
+                    width: 32px;
+                    height: 32px;
+                    border-radius: 50%;
+                    cursor: pointer;
+                    font-size: 20px;
+                ">&times;</button>
+                
+                <h2 style="color: #00ff88; margin-bottom: 20px;">${signal.symbol} - ${signal.strategy}</h2>
+                
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 30px;">
+                    <div style="background: #0a0a0a; padding: 15px; border-radius: 8px; border: 1px solid #222;">
+                        <div style="color: #888; font-size: 12px; margin-bottom: 5px;">ACTION</div>
+                        <div style="font-size: 24px; font-weight: 700; color: ${signal.action === 'SELL' ? '#00ff88' : '#4a9eff'};">${signal.action}</div>
+                    </div>
+                    <div style="background: #0a0a0a; padding: 15px; border-radius: 8px; border: 1px solid #222;">
+                        <div style="color: #888; font-size: 12px; margin-bottom: 5px;">CONFIDENCE</div>
+                        <div style="font-size: 24px; font-weight: 700;">${signal.confidence}%</div>
+                    </div>
+                    <div style="background: #0a0a0a; padding: 15px; border-radius: 8px; border: 1px solid #222;">
+                        <div style="color: #888; font-size: 12px; margin-bottom: 5px;">IV RANK</div>
+                        <div style="font-size: 24px; font-weight: 700;">${signal.ivRank}%</div>
+                    </div>
+                    <div style="background: #0a0a0a; padding: 15px; border-radius: 8px; border: 1px solid #222;">
+                        <div style="color: #888; font-size: 12px; margin-bottom: 5px;">CURRENT IV</div>
+                        <div style="font-size: 24px; font-weight: 700;">${signal.currentIV}%</div>
+                    </div>
+                </div>
+                
+                <div style="background: #0a0a0a; padding: 20px; border-radius: 8px; border: 1px solid #222; margin-bottom: 20px;">
+                    <h3 style="color: #fff; margin-bottom: 15px; font-size: 16px;">📊 Strategy Details</h3>
+                    <p style="color: #aaa; line-height: 1.8;">${signal.reasoning}</p>
+                </div>
+                
+                ${trade.type ? `
+                <div style="background: #0a0a0a; padding: 20px; border-radius: 8px; border: 1px solid #222; margin-bottom: 20px;">
+                    <h3 style="color: #fff; margin-bottom: 15px; font-size: 16px;">🎯 Trade Specifications</h3>
+                    <div style="display: grid; gap: 12px;">
+                        <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222;">
+                            <span style="color: #888;">Type:</span>
+                            <span style="color: #fff; font-weight: 600;">${trade.type}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222;">
+                            <span style="color: #888;">DTE:</span>
+                            <span style="color: #fff; font-weight: 600;">${trade.dte || (trade.dte?.short ? `${trade.dte.short}/${trade.dte.long}` : 'N/A')} days</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222;">
+                            <span style="color: #888;">Estimated Credit/Debit:</span>
+                            <span style="color: #00ff88; font-weight: 600;">$${trade.estimatedCredit || trade.estimatedDebit || trade.estimatedPremium || 0}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222;">
+                            <span style="color: #888;">Max Profit:</span>
+                            <span style="color: #00ff88; font-weight: 600;">$${trade.maxProfit || 'Unlimited'}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222;">
+                            <span style="color: #888;">Max Loss:</span>
+                            <span style="color: #ff4444; font-weight: 600;">$${trade.maxLoss || 'Unlimited'}</span>
+                        </div>
+                        ${trade.pop ? `
+                        <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222;">
+                            <span style="color: #888;">Probability of Profit:</span>
+                            <span style="color: #fff; font-weight: 600;">${trade.pop}%</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+                ` : ''}
+                
+                ${Object.keys(strikes).length > 0 ? `
+                <div style="background: #0a0a0a; padding: 20px; border-radius: 8px; border: 1px solid #222; margin-bottom: 20px;">
+                    <h3 style="color: #fff; margin-bottom: 15px; font-size: 16px;">📍 Strike Prices</h3>
+                    <div style="display: grid; gap: 10px; font-family: monospace;">
+                        ${Object.entries(strikes).map(([key, value]) => `
+                            <div style="display: flex; justify-content: space-between; padding: 8px; background: #000; border-radius: 4px;">
+                                <span style="color: #888;">${key.replace(/([A-Z])/g, ' $1').trim()}:</span>
+                                <span style="color: #00ff88; font-weight: 600;">$${value}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                ` : ''}
+                
+                ${signal.backtest ? `
+                <div style="background: #0a0a0a; padding: 20px; border-radius: 8px; border: 1px solid #222; margin-bottom: 20px;">
+                    <h3 style="color: #fff; margin-bottom: 15px; font-size: 16px;">📈 Backtest Performance</h3>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                        <div>
+                            <div style="color: #888; font-size: 12px; margin-bottom: 5px;">Win Rate</div>
+                            <div style="font-size: 20px; font-weight: 700; color: #00ff88;">${signal.backtest.winRate}%</div>
+                        </div>
+                        <div>
+                            <div style="color: #888; font-size: 12px; margin-bottom: 5px;">Trades</div>
+                            <div style="font-size: 20px; font-weight: 700;">${signal.backtest.trades}</div>
+                        </div>
+                        <div>
+                            <div style="color: #888; font-size: 12px; margin-bottom: 5px;">Sharpe Ratio</div>
+                            <div style="font-size: 20px; font-weight: 700;">${signal.backtest.sharpe}</div>
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+                
+                ${trade.note ? `
+                <div style="background: #1a1a00; padding: 15px; border-radius: 8px; border: 1px solid #443300; margin-bottom: 20px;">
+                    <div style="color: #ffaa00; font-size: 14px;">⚠️ ${trade.note}</div>
+                </div>
+                ` : ''}
+                
+                <div style="display: flex; gap: 15px; margin-top: 30px;">
+                    <button onclick='openPosition(${JSON.stringify(signal)})' style="
+                        flex: 1;
+                        background: #00ff88;
+                        color: #000;
+                        border: none;
+                        padding: 15px 30px;
+                        border-radius: 8px;
+                        font-weight: 700;
+                        cursor: pointer;
+                        font-size: 16px;
+                    ">Enter Trade</button>
+                    <button onclick="this.parentElement.parentElement.parentElement.remove()" style="
+                        flex: 1;
+                        background: #222;
+                        color: #fff;
+                        border: none;
+                        padding: 15px 30px;
+                        border-radius: 8px;
+                        font-weight: 700;
+                        cursor: pointer;
+                        font-size: 16px;
+                    ">Close</button>
+                </div>
+            `;
+            
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+            
+            // Close on background click
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
         }
     </script>
 </body>
