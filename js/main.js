@@ -77,6 +77,34 @@ function setupEventListeners() {
     // Add position button
     document.querySelector('.btn-primary[onclick="addPosition()"]')?.addEventListener('click', handleAddPosition);
     
+    // Refresh signals button
+    document.getElementById('refreshSignalsBtn')?.addEventListener('click', async () => {
+        const btn = document.getElementById('refreshSignalsBtn');
+        const originalHTML = btn.innerHTML;
+        
+        try {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating Signals...';
+            
+            console.log('🔄 Refreshing signals...');
+            await SignalsEngine.generateAllSignals();
+            updateSignalsDisplay();
+            
+            btn.innerHTML = '<i class="fas fa-check"></i> Signals Updated!';
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+            }, 2000);
+        } catch (error) {
+            console.error('❌ Error refreshing signals:', error);
+            btn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+            }, 2000);
+        }
+    });
+    
     // Strategy buttons are handled with onclick attributes in HTML
 }
 
@@ -129,6 +157,11 @@ async function loadTabData(tab) {
             // Scanner loads on demand
             break;
         case 'signals':
+            // Check if signals exist, if not generate them
+            if (!SignalsEngine.signals || SignalsEngine.signals.length === 0) {
+                console.log('📡 No signals found, generating...');
+                await SignalsEngine.generateAllSignals();
+            }
             updateSignalsDisplay();
             break;
         case 'greeks':
@@ -275,7 +308,7 @@ function updateSignalCategory(elementId, signalType) {
     const signals = SignalsEngine.getSignalsByType(signalType);
     
     if (!signals || signals.length === 0) {
-        container.innerHTML = '<div class="empty-state">No signals found. Generate signals to see opportunities.</div>';
+        container.innerHTML = '<div class="empty-state">🔍 No signals detected yet. The system is analyzing market data...</div>';
         return;
     }
     
@@ -302,10 +335,17 @@ function updateSignalCategory(elementId, signalType) {
  */
 function updateSignalsTable() {
     const tbody = document.getElementById('signalsResults');
+    
+    // Safety check
+    if (!tbody) {
+        console.warn('⚠️ Signals table not found');
+        return;
+    }
+    
     const signals = SignalsEngine.signals.slice(0, 50);
     
     if (signals.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No signals available</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="empty-state">🔍 Analyzing market data for trading signals...</td></tr>';
         return;
     }
     
