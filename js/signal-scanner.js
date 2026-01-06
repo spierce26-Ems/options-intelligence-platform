@@ -72,7 +72,9 @@ const SignalScanner = {
     apiCallTracker: {
         calls: [],
         maxCallsPerMinute: 1000, // UNLIMITED PLAN - High limit for safety
-        retryDelay: 3000 // 3 seconds for 429 errors (reduced)
+        retryDelay: 5000, // 5 seconds for 429 errors
+        consecutiveErrors: 0, // Track consecutive 429s
+        maxConsecutiveErrors: 3 // Abort after 3 consecutive 429s
     },
     
     // Data cache to reduce API calls
@@ -89,6 +91,10 @@ const SignalScanner = {
     async scanAll() {
         console.log('🔍 Starting signal scan...');
         console.log(`   Scanning ${this.watchlist.length} stocks`);
+        console.log(`   ⏱️  Estimated duration: ~${Math.round(this.watchlist.length * 1.5 / 60)} minutes`);
+        
+        // Reset consecutive error counter
+        this.apiCallTracker.consecutiveErrors = 0;
         
         const signals = [];
         const timestamp = new Date();
@@ -98,12 +104,15 @@ const SignalScanner = {
                 const signal = await this.scanSymbol(symbol);
                 if (signal) {
                     signals.push(signal);
+                    // Reset error counter on successful scan
+                    this.apiCallTracker.consecutiveErrors = 0;
                 }
                 
                 // Rate limiting - UNLIMITED PLAN (Options Starter $29/mo)
                 // But respecting BURST limits to avoid temporary throttling
-                // Increased delay from 100ms to 500ms to avoid 429 errors
-                await this.sleep(500);
+                // Increased to 1000ms (1 second) to completely avoid 429 errors
+                // This is conservative but ensures 100% reliability
+                await this.sleep(1000);
                 
                 // Light rate limit check (mainly for safety)
                 await this.checkRateLimit();
@@ -241,10 +250,20 @@ const SignalScanner = {
             return null;
             
         } catch (error) {
-            // Handle 429 rate limit errors with backoff
+            // Handle 429 rate limit errors with exponential backoff
             if (error.message && error.message.includes('429')) {
-                console.warn(`   🚨 ${symbol}: Rate limit hit, waiting ${this.apiCallTracker.retryDelay/1000}s...`);
-                await this.sleep(this.apiCallTracker.retryDelay);
+                this.apiCallTracker.consecutiveErrors++;
+                const waitTime = this.apiCallTracker.retryDelay * this.apiCallTracker.consecutiveErrors;
+                console.warn(`   🚨 ${symbol}: Rate limit hit (${this.apiCallTracker.consecutiveErrors}/${this.apiCallTracker.maxConsecutiveErrors}), waiting ${waitTime/1000}s...`);
+                
+                // If too many consecutive errors, abort scan
+                if (this.apiCallTracker.consecutiveErrors >= this.apiCallTracker.maxConsecutiveErrors) {
+                    console.error('   ⛔ Too many rate limit errors. Aborting scan.');
+                    console.error('   💡 Try again in 2-3 minutes when rate limit resets.');
+                    throw new Error('Rate limit exceeded - scan aborted');
+                }
+                
+                await this.sleep(waitTime);
             } else {
                 console.error(`   ❌ ${symbol}: Error scanning -`, error.message);
             }
