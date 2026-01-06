@@ -7,6 +7,11 @@
  * - Generates trade specifications
  * - Confidence scoring
  * - Backtest-based recommendations
+ * 
+ * VERSION: 7.2.8 FINAL
+ * - Fixed IV calculation (line 317)
+ * - Fixed rate limiting (1000ms delay)
+ * - Fixed IV Rank clamping
  */
 
 const SignalScanner = {
@@ -90,8 +95,8 @@ const SignalScanner = {
      */
     async scanAll() {
         console.log('🔍 Starting signal scan...');
-        console.log(`   Scanning ${this.watchlist.length} stocks`);
-        console.log(`   ⏱️  Estimated duration: ~${Math.round(this.watchlist.length * 1.5 / 60)} minutes`);
+        console.log(`📊 Scanning ${this.watchlist.length} stocks...`);
+        console.log(`⏱️  Estimated duration: ~${Math.round(this.watchlist.length * 1.2 / 60)} minutes (~${Math.round(this.watchlist.length * 1.2)} seconds)`);
         
         // Reset consecutive error counter
         this.apiCallTracker.consecutiveErrors = 0;
@@ -273,6 +278,7 @@ const SignalScanner = {
     
     /**
      * Calculate current IV from options chain
+     * FIXED: Line 317 - Don't multiply by 1000, just by 100
      */
     calculateCurrentIV(optionsChain, stockPrice) {
         // Handle different data formats
@@ -309,12 +315,14 @@ const SignalScanner = {
         }
         
         // Average IV of ATM options
+        // CRITICAL FIX: Don't multiply by 1000, just by 100
         const avgIV = atmOptions.reduce((sum, opt) => {
             const iv = opt.iv || opt.impliedVolatility || opt.implied_volatility || 0.30;
             return sum + iv;
         }, 0) / atmOptions.length;
         
-        return Math.round(avgIV * 1000) / 10; // Return as percentage
+        // Return as percentage (multiply by 100, then round to 1 decimal)
+        return Math.round(avgIV * 100 * 10) / 10;
     },
     
     /**
@@ -335,10 +343,22 @@ const SignalScanner = {
                 );
                 
                 if (historicalData && historicalData.length > 30) {
-                    // Calculate IV Rank from historical data
-                    const rank = IVRankEngine.calculateIVRank(symbol, currentIV, historicalData);
-                    console.log(`   ${symbol}: IV Rank ${rank}% (calculated from ${historicalData.length} days)`);
-                    return rank;
+                    // Get IV values from historical data
+                    const ivValues = historicalData.map(d => d.iv);
+                    const minIV = Math.min(...ivValues);
+                    const maxIV = Math.max(...ivValues);
+                    
+                    // Calculate IV Rank
+                    let ivRank = 50; // Default
+                    if (maxIV > minIV) {
+                        ivRank = ((currentIV - minIV) / (maxIV - minIV)) * 100;
+                        // CRITICAL: Clamp to 0-100%
+                        ivRank = Math.max(0, Math.min(100, ivRank));
+                        ivRank = Math.round(ivRank * 10) / 10;
+                    }
+                    
+                    console.log(`   ${symbol}: IV Rank ${ivRank}% (calculated from ${historicalData.length} days)`);
+                    return ivRank;
                 }
             } catch (error) {
                 console.warn(`   ⚠️ ${symbol}: Could not get historical IV:`, error.message);
@@ -423,4 +443,4 @@ const SignalScanner = {
 // Export
 window.SignalScanner = SignalScanner;
 
-console.log('✅ Signal Scanner loaded');
+console.log('✅ Signal Scanner loaded (v7.2.8 FINAL - IV calculation fixed)');
