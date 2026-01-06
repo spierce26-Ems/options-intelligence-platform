@@ -113,71 +113,104 @@ const SignalScanner = {
      * Scan a single symbol for opportunities
      */
     async scanSymbol(symbol) {
-        // Get current stock price and IV
-        const stockData = await RealTimeData.getStockPrice(symbol);
-        if (!stockData) {
-            console.log(`   ⚠️ ${symbol}: No price data`);
-            return null;
-        }
-        
-        // Get options chain to calculate IV Rank
-        const optionsData = await RealTimeData.getOptionsChain(symbol);
-        if (!optionsData || optionsData.length === 0) {
-            console.log(`   ⚠️ ${symbol}: No options data`);
-            return null;
-        }
-        
-        // Calculate current IV (average of ATM options)
-        const currentIV = this.calculateCurrentIV(optionsData, stockData.price);
-        if (!currentIV) {
-            console.log(`   ⚠️ ${symbol}: Could not calculate IV`);
-            return null;
-        }
-        
-        // Calculate IV Rank (using historical data if available)
-        const ivRank = await this.calculateIVRank(symbol, currentIV);
-        
-        // Generate signal if IV Rank is extreme
-        if (ivRank > 80 || ivRank < 20) {
-            const signal = IVRankEngine.generateSignal(
-                symbol,
-                ivRank,
-                currentIV,
-                stockData.price
-            );
-            
-            if (signal && signal.action !== 'WAIT') {
-                // Enhance signal with backtest data
-                const backtestData = this.backtestResults[symbol] || { winRate: 70, trades: 0, sharpe: 1.5 };
-                
-                signal.backtest = backtestData;
-                signal.timestamp = new Date().toISOString();
-                signal.currentPrice = stockData.price;
-                signal.currentIV = currentIV;
-                
-                console.log(`   🎯 ${symbol}: ${signal.action} signal @ IV Rank ${ivRank}%`);
-                
-                return signal;
+        try {
+            // Get current stock price and IV
+            const stockData = await RealTimeData.getStockPrice(symbol);
+            if (!stockData || !stockData.price) {
+                console.log(`   ⚠️ ${symbol}: No price data`);
+                return null;
             }
+            
+            // Get options chain to calculate IV Rank
+            const optionsData = await RealTimeData.getOptionsChain(symbol);
+            if (!optionsData) {
+                console.log(`   ⚠️ ${symbol}: No options data`);
+                return null;
+            }
+            
+            // Calculate current IV (average of ATM options)
+            const currentIV = this.calculateCurrentIV(optionsData, stockData.price);
+            if (!currentIV) {
+                console.log(`   ⚠️ ${symbol}: Could not calculate IV`);
+                return null;
+            }
+            
+            // Calculate IV Rank (using historical data if available)
+            const ivRank = await this.calculateIVRank(symbol, currentIV);
+            
+            // Generate signal if IV Rank is extreme
+            if (ivRank > 80 || ivRank < 20) {
+                const signal = IVRankEngine.generateSignal(
+                    symbol,
+                    ivRank,
+                    currentIV,
+                    stockData.price
+                );
+                
+                if (signal && signal.action !== 'WAIT') {
+                    // Enhance signal with backtest data
+                    const backtestData = this.backtestResults[symbol] || { winRate: 70, trades: 0, sharpe: 1.5 };
+                    
+                    signal.backtest = backtestData;
+                    signal.timestamp = new Date().toISOString();
+                    signal.currentPrice = stockData.price;
+                    signal.currentIV = currentIV;
+                    
+                    console.log(`   🎯 ${symbol}: ${signal.action} signal @ IV Rank ${ivRank}%`);
+                    
+                    return signal;
+                }
+            }
+            
+            return null;
+            
+        } catch (error) {
+            console.error(`   ❌ ${symbol}: Error scanning -`, error.message);
+            return null;
         }
-        
-        return null;
     },
     
     /**
      * Calculate current IV from options chain
      */
     calculateCurrentIV(optionsChain, stockPrice) {
+        // Handle different data formats
+        let optionsArray = optionsChain;
+        
+        // If optionsChain is an object with a results/data array, extract it
+        if (!Array.isArray(optionsChain)) {
+            if (optionsChain.results && Array.isArray(optionsChain.results)) {
+                optionsArray = optionsChain.results;
+            } else if (optionsChain.data && Array.isArray(optionsChain.data)) {
+                optionsArray = optionsChain.data;
+            } else if (optionsChain.options && Array.isArray(optionsChain.options)) {
+                optionsArray = optionsChain.options;
+            } else {
+                console.warn('   ⚠️ Options data is not an array:', typeof optionsChain);
+                return null;
+            }
+        }
+        
+        if (!optionsArray || optionsArray.length === 0) {
+            console.warn('   ⚠️ No options in array');
+            return null;
+        }
+        
         // Find ATM options (within 5% of stock price)
-        const atmOptions = optionsChain.filter(opt => {
-            return Math.abs(opt.strike - stockPrice) < stockPrice * 0.05;
+        const atmOptions = optionsArray.filter(opt => {
+            const strike = opt.strike || opt.strikePrice || opt.strike_price || 0;
+            return Math.abs(strike - stockPrice) < stockPrice * 0.05;
         });
         
-        if (atmOptions.length === 0) return null;
+        if (atmOptions.length === 0) {
+            console.warn('   ⚠️ No ATM options found');
+            return null;
+        }
         
         // Average IV of ATM options
         const avgIV = atmOptions.reduce((sum, opt) => {
-            return sum + (opt.iv || opt.impliedVolatility || 0.30);
+            const iv = opt.iv || opt.impliedVolatility || opt.implied_volatility || 0.30;
+            return sum + iv;
         }, 0) / atmOptions.length;
         
         return Math.round(avgIV * 1000) / 10; // Return as percentage
