@@ -71,8 +71,8 @@ const SignalScanner = {
     // API call tracking for rate limiting
     apiCallTracker: {
         calls: [],
-        maxCallsPerMinute: 90, // Conservative limit (10 below actual limit)
-        retryDelay: 5000 // 5 seconds for 429 errors
+        maxCallsPerMinute: 1000, // UNLIMITED PLAN - High limit for safety
+        retryDelay: 3000 // 3 seconds for 429 errors (reduced)
     },
     
     // Data cache to reduce API calls
@@ -100,13 +100,12 @@ const SignalScanner = {
                     signals.push(signal);
                 }
                 
-                // Rate limiting - Starter plan has 100 calls/min
-                // Each stock needs 3 API calls (price, options, historical)
-                // 70 stocks × 3 = 210 calls (exceeds limit!)
-                // Solution: 1000ms delay = 60 stocks/hour = 180 calls/hour (stays under limit)
-                await this.sleep(1000);
+                // Rate limiting - UNLIMITED PLAN (Options Starter $29/mo)
+                // Much faster scanning with unlimited API calls!
+                // Reduced delay from 1000ms to 100ms for faster scans
+                await this.sleep(100);
                 
-                // Check if we're approaching rate limit
+                // Light rate limit check (mainly for safety)
                 await this.checkRateLimit();
                 
             } catch (error) {
