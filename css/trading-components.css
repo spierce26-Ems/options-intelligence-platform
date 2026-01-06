@@ -49,63 +49,25 @@
 
 .kpi-card-primary .kpi-label {
     font-size: var(--text-xs);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-2);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-weight: var(--weight-semibold);
-    color: var(--text-tertiary);
-    margin-bottom: var(--space-3);
+    letter-spacing: 0.05em;
 }
 
 .kpi-card-primary .kpi-value {
     font-size: var(--text-4xl);
-    font-weight: var(--weight-semibold);
-    font-family: var(--font-mono);
-    line-height: 1;
+    font-weight: var(--weight-bold);
     color: var(--text-primary);
-    margin-bottom: var(--space-2);
 }
 
 .kpi-card-primary .kpi-change {
     font-size: var(--text-sm);
-    font-weight: var(--weight-medium);
-    font-family: var(--font-mono);
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-1);
+    margin-top: var(--space-2);
 }
 
 /* ========================================
-   PRICE DISPLAY - DOMINANT ELEMENT
-   ======================================== */
-.price-display {
-    display: flex;
-    align-items: baseline;
-    gap: var(--space-3);
-}
-
-.price-value {
-    font-size: var(--text-4xl);
-    font-weight: var(--weight-semibold);
-    font-family: var(--font-mono);
-    color: var(--text-primary);
-}
-
-.price-delta {
-    font-size: var(--text-lg);
-    font-weight: var(--weight-medium);
-    font-family: var(--font-mono);
-}
-
-.price-delta.positive {
-    color: var(--direction-up);
-}
-
-.price-delta.negative {
-    color: var(--direction-down);
-}
-
-/* ========================================
-   TIMEFRAME SELECTOR - ALWAYS VISIBLE
+   TIMEFRAME SELECTOR (iOS-Style Segmented Control)
    ======================================== */
 .timeframe-selector {
     display: inline-flex;
@@ -116,286 +78,83 @@
 }
 
 .timeframe-option {
-    padding: var(--space-2) var(--space-5);
+    padding: var(--space-2) var(--space-4);
     font-size: var(--text-sm);
     font-weight: var(--weight-medium);
     color: var(--text-secondary);
     background: transparent;
     border: none;
-    border-radius: calc(var(--radius-md) - 2px);
+    border-radius: var(--radius-sm);
     cursor: pointer;
     transition: all var(--duration-fast) var(--easing);
-    font-family: var(--font-family);
 }
 
 .timeframe-option:hover {
     color: var(--text-primary);
+    background: var(--bg-tertiary);
 }
 
 .timeframe-option.active {
+    color: var(--accent-primary);
     background: var(--bg-elevated);
-    color: var(--text-primary);
     box-shadow: var(--elevation-1);
 }
 
 /* ========================================
-   OPPORTUNITIES LIST - MINIMAL DESIGN
+   WORLD EVENT ANALYZER
    ======================================== */
-.opportunities-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-}
-
-.opportunity-item {
+.world-event-analyzer {
     background: var(--bg-secondary);
     border-radius: var(--radius-lg);
-    padding: var(--space-5);
+    padding: var(--space-6);
+    margin-bottom: var(--space-6);
     box-shadow: var(--elevation-1);
-    transition: all var(--duration-normal) var(--easing);
-    cursor: pointer;
 }
 
-.opportunity-item:hover {
-    background: var(--bg-tertiary);
-    box-shadow: var(--elevation-2);
-    transform: translateY(-2px);
-}
-
-.opportunity-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+.world-event-analyzer .section-header {
     margin-bottom: var(--space-4);
 }
 
-.opportunity-symbol {
-    display: flex;
-    align-items: baseline;
-    gap: var(--space-3);
-}
-
-.symbol-ticker {
-    font-size: var(--text-2xl);
-    font-weight: var(--weight-semibold);
-    font-family: var(--font-mono);
-    color: var(--text-primary);
-}
-
-.symbol-price {
+.world-event-analyzer .section-title {
     font-size: var(--text-lg);
-    font-weight: var(--weight-medium);
-    font-family: var(--font-mono);
-    color: var(--text-secondary);
-}
-
-.opportunity-score {
-    text-align: right;
-}
-
-.score-value {
-    font-size: var(--text-3xl);
-    font-weight: var(--weight-semibold);
-    font-family: var(--font-mono);
-    line-height: 1;
-}
-
-.score-value.excellent {
-    color: var(--status-success);
-}
-
-.score-value.good {
-    color: var(--accent-primary);
-}
-
-.score-value.moderate {
-    color: var(--status-warning);
-}
-
-.score-label {
-    font-size: var(--text-xs);
-    color: var(--text-tertiary);
-    margin-top: var(--space-1);
-}
-
-.opportunity-metrics {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: var(--space-4);
-    padding-top: var(--space-4);
-    border-top: 1px solid var(--separator);
-}
-
-.metric-item {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
-}
-
-.metric-label {
-    font-size: var(--text-xs);
-    color: var(--text-tertiary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.metric-value {
-    font-size: var(--text-base);
-    font-weight: var(--weight-semibold);
-    font-family: var(--font-mono);
-    color: var(--text-primary);
-}
-
-/* ========================================
-   TRADE ACTION - CLEAR CALL TO ACTION
-   ======================================== */
-.trade-action {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-2) var(--space-4);
-    border-radius: var(--radius-md);
-    font-size: var(--text-sm);
-    font-weight: var(--weight-semibold);
-}
-
-.trade-action.call {
-    background: rgba(48, 209, 88, 0.15);
-    color: var(--status-success);
-}
-
-.trade-action.put {
-    background: rgba(255, 69, 58, 0.15);
-    color: var(--status-error);
-}
-
-.trade-arrow {
-    font-size: var(--text-lg);
-}
-
-/* ========================================
-   CHART CONTAINER - ONE DOMINANT CHART
-   ======================================== */
-.chart-container {
-    background: var(--bg-secondary);
-    border-radius: var(--radius-lg);
-    padding: var(--space-6);
-    box-shadow: var(--elevation-1);
-    margin-bottom: var(--space-6);
-}
-
-.chart-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: var(--space-5);
-}
-
-.chart-title {
-    font-size: var(--text-lg);
-    font-weight: var(--weight-semibold);
-    color: var(--text-primary);
-}
-
-.chart-controls {
-    display: flex;
-    gap: var(--space-2);
-}
-
-.chart-canvas {
-    position: relative;
-    height: 400px;
-}
-
-/* Muted grid and axes */
-canvas {
-    border-radius: var(--radius-md);
-}
-
-/* ========================================
-   WORLD EVENT ANALYZER - CLEAN INPUT
-   ======================================== */
-.event-analyzer {
-    background: var(--bg-secondary);
-    border-radius: var(--radius-lg);
-    padding: var(--space-6);
-    margin-bottom: var(--space-8);
-    box-shadow: var(--elevation-1);
-}
-
-.event-analyzer-header {
-    margin-bottom: var(--space-5);
-}
-
-.event-analyzer-title {
-    font-size: var(--text-xl);
     font-weight: var(--weight-semibold);
     color: var(--text-primary);
     margin-bottom: var(--space-1);
 }
 
-.event-analyzer-subtitle {
+.world-event-analyzer .section-subtitle {
     font-size: var(--text-sm);
     color: var(--text-secondary);
 }
 
 .event-input-group {
     display: flex;
-    flex-direction: column;
     gap: var(--space-3);
+    margin-bottom: var(--space-4);
 }
 
-.event-input-label {
-    font-size: var(--text-sm);
-    font-weight: var(--weight-medium);
-    color: var(--text-secondary);
-}
-
-.event-input {
-    width: 100%;
-    padding: var(--space-4);
+.event-input-group input {
+    flex: 1;
+    padding: var(--space-3) var(--space-4);
     font-size: var(--text-base);
-    font-family: var(--font-family);
     color: var(--text-primary);
-    background: var(--bg-tertiary);
+    background: var(--bg-primary);
     border: 1px solid var(--separator);
     border-radius: var(--radius-md);
     transition: all var(--duration-fast) var(--easing);
 }
 
-.event-input:focus {
+.event-input-group input:focus {
     outline: none;
     border-color: var(--accent-primary);
-    background: var(--bg-elevated);
-    box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.1);
-}
-
-.event-input::placeholder {
-    color: var(--text-quaternary);
-}
-
-.event-controls {
-    display: flex;
-    gap: var(--space-3);
-    align-items: center;
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
 }
 
 .event-examples {
-    margin-top: var(--space-4);
-    padding-top: var(--space-4);
-    border-top: 1px solid var(--separator);
-}
-
-.examples-label {
-    font-size: var(--text-xs);
-    color: var(--text-tertiary);
-    margin-bottom: var(--space-2);
-}
-
-.example-chips {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-2);
+    margin-bottom: var(--space-4);
 }
 
 .example-chip {
@@ -417,229 +176,205 @@ canvas {
 }
 
 /* ========================================
-   LOADING STATES - MINIMAL
+   OPPORTUNITIES LIST
    ======================================== */
-.loading-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-9);
-}
-
-.loading-spinner {
-    width: 24px;
-    height: 24px;
-    border: 2px solid var(--separator);
-    border-top-color: var(--accent-primary);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-.loading-text {
-    margin-top: var(--space-3);
-    font-size: var(--text-sm);
-    color: var(--text-tertiary);
-}
-
-/* ========================================
-   EMPTY STATE - CALM
-   ======================================== */
-.empty-state {
+.opportunities-list {
     display: flex;
     flex-direction: column;
+    gap: var(--space-3);
+    margin-bottom: var(--space-6);
+}
+
+.opportunity-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+    box-shadow: var(--elevation-1);
+    transition: all var(--duration-normal) var(--easing);
+}
+
+.opportunity-card:hover {
+    box-shadow: var(--elevation-2);
+}
+
+.opportunity-header {
+    display: flex;
     align-items: center;
-    justify-content: center;
-    padding: var(--space-9) var(--space-6);
-    text-align: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-3);
 }
 
-.empty-icon {
-    font-size: 48px;
-    color: var(--text-quaternary);
-    margin-bottom: var(--space-4);
+.opportunity-symbol {
+    font-size: var(--text-xl);
+    font-weight: var(--weight-bold);
+    color: var(--text-primary);
 }
 
-.empty-title {
+.opportunity-score {
     font-size: var(--text-lg);
-    font-weight: var(--weight-semibold);
-    color: var(--text-secondary);
-    margin-bottom: var(--space-2);
-}
-
-.empty-description {
-    font-size: var(--text-sm);
-    color: var(--text-tertiary);
-    max-width: 400px;
-}
-
-/* ========================================
-   TOOLTIP - DETAILS ON DEMAND
-   ======================================== */
-.tooltip {
-    position: absolute;
-    background: var(--bg-elevated);
-    border: 1px solid var(--separator);
+    font-weight: var(--weight-bold);
+    padding: var(--space-2) var(--space-3);
     border-radius: var(--radius-md);
-    padding: var(--space-3) var(--space-4);
-    box-shadow: var(--elevation-3);
-    z-index: 1000;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity var(--duration-fast) var(--easing);
 }
 
-.tooltip.visible {
-    opacity: 1;
+.opportunity-score.excellent {
+    color: var(--success);
+    background: rgba(52, 199, 89, 0.1);
 }
 
-.tooltip-label {
+.opportunity-score.good {
+    color: var(--accent-primary);
+    background: rgba(0, 122, 255, 0.1);
+}
+
+.opportunity-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--separator);
+}
+
+.opportunity-metric {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.opportunity-metric .label {
     font-size: var(--text-xs);
-    color: var(--text-tertiary);
-    margin-bottom: var(--space-1);
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
-.tooltip-value {
+.opportunity-metric .value {
     font-size: var(--text-base);
     font-weight: var(--weight-semibold);
-    font-family: var(--font-mono);
     color: var(--text-primary);
 }
 
 /* ========================================
-   RESPONSIVE TRADING VIEW
+   BACKTESTING PANEL
    ======================================== */
-@media (max-width: 768px) {
-    .kpi-dashboard {
-        grid-template-columns: 1fr;
-    }
-    
-    .trading-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--space-4);
-    }
-    
-    .timeframe-selector {
-        width: 100%;
-    }
-    
-    .timeframe-option {
-        flex: 1;
-    }
-    
-    .opportunity-metrics {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .chart-canvas {
-        height: 300px;
-    }
-    
-    .event-controls {
-        flex-direction: column;
-    }
-    
-    .button {
-        width: 100%;
-    }
-}
-
-/* ========================================
-   DETAIL VIEW - DRILL DOWN
-   ======================================== */
-.detail-view {
+.backtesting-panel {
     background: var(--bg-secondary);
     border-radius: var(--radius-lg);
     padding: var(--space-6);
-    box-shadow: var(--elevation-2);
+    margin-bottom: var(--space-6);
+    box-shadow: var(--elevation-1);
 }
 
-.detail-header {
+.backtesting-panel .section-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: var(--space-6);
-    padding-bottom: var(--space-4);
+    margin-bottom: var(--space-4);
+}
+
+.backtesting-panel .section-title {
+    font-size: var(--text-lg);
+    font-weight: var(--weight-semibold);
+    color: var(--text-primary);
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    margin-top: var(--space-4);
+}
+
+/* ========================================
+   DATA SOURCE BANNER
+   ======================================== */
+.data-source-banner {
+    padding: var(--space-3) 0;
+    text-align: center;
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
     border-bottom: 1px solid var(--separator);
 }
 
-.detail-back {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-2) var(--space-3);
-    font-size: var(--text-sm);
-    color: var(--text-secondary);
-    background: transparent;
+.data-source-banner.real-data {
+    background: rgba(52, 199, 89, 0.1);
+    color: var(--success);
+    border-bottom-color: rgba(52, 199, 89, 0.3);
+}
+
+.data-source-banner.simulated-data {
+    background: rgba(255, 159, 10, 0.1);
+    color: #FF9F0A;
+    border-bottom-color: rgba(255, 159, 10, 0.3);
+}
+
+.data-source-banner a {
+    color: inherit;
+    text-decoration: underline;
+    font-weight: var(--weight-semibold);
+}
+
+.data-source-banner a:hover {
+    opacity: 0.8;
+}
+
+/* ========================================
+   BUTTONS & ACTIONS
+   ======================================== */
+.action-btn {
+    padding: var(--space-3) var(--space-5);
+    font-size: var(--text-base);
+    font-weight: var(--weight-semibold);
     border: none;
     border-radius: var(--radius-md);
     cursor: pointer;
     transition: all var(--duration-fast) var(--easing);
 }
 
-.detail-back:hover {
+.action-btn.primary {
+    color: #FFFFFF;
+    background: var(--accent-primary);
+}
+
+.action-btn.primary:hover {
+    background: #0051D5;
+    transform: translateY(-1px);
+    box-shadow: var(--elevation-2);
+}
+
+.action-btn.secondary {
     color: var(--text-primary);
+    background: var(--bg-secondary);
+    border: 1px solid var(--separator);
+}
+
+.action-btn.secondary:hover {
     background: var(--bg-tertiary);
 }
 
-.detail-content {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: var(--space-6);
-}
-
-.detail-main {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-5);
-}
-
-.detail-sidebar {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
+.action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 /* ========================================
-   INFO SECTION - SECONDARY INSIGHTS
+   RESPONSIVE DESIGN
    ======================================== */
-.info-section {
-    background: var(--bg-tertiary);
-    border-radius: var(--radius-md);
-    padding: var(--space-4);
-}
-
-.info-title {
-    font-size: var(--text-sm);
-    font-weight: var(--weight-semibold);
-    color: var(--text-secondary);
-    margin-bottom: var(--space-3);
-}
-
-.info-items {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-}
-
-.info-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.info-label {
-    font-size: var(--text-sm);
-    color: var(--text-tertiary);
-}
-
-.info-value {
-    font-size: var(--text-sm);
-    font-weight: var(--weight-medium);
-    font-family: var(--font-mono);
-    color: var(--text-primary);
+@media (max-width: 768px) {
+    .trading-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-4);
+    }
+    
+    .kpi-dashboard {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .event-input-group {
+        flex-direction: column;
+    }
+    
+    .opportunity-metrics {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
