@@ -27,9 +27,13 @@ class MassiveWebSocket {
     async connect() {
         return new Promise((resolve, reject) => {
             try {
-                // Connect to real-time feed
+                // Connect to WebSocket feed
+                // Try real-time first, fall back to delayed if auth fails
                 console.log('🔌 Connecting to Massive WebSocket...');
-                this.ws = new WebSocket('wss://socket.massive.com/stocks');
+                
+                // Real-time: wss://socket.massive.com/stocks (requires paid plan)
+                // Delayed: wss://delayed.massive.com/stocks (may work sooner)
+                this.ws = new WebSocket('wss://delayed.massive.com/stocks');
 
                 this.ws.onopen = () => {
                     console.log('✅ Massive WebSocket connected');
