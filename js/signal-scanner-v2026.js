@@ -208,16 +208,33 @@ const SignalScanner = {
     },
     
     /**
+     * 🚀 NEW: Get stock price - WebSocket first, REST API fallback
+     */
+    async getStockPrice(symbol) {
+        // Try WebSocket first (if available and connected)
+        if (window.massiveWS && window.massiveWS.isReady()) {
+            const wsPrice = window.massiveWS.getPrice(symbol);
+            if (wsPrice && wsPrice.price) {
+                console.log(`   📡 ${symbol}: WebSocket price $${wsPrice.price.toFixed(2)} (${wsPrice.changePercent.toFixed(2)}%)`);
+                return wsPrice;
+            }
+        }
+        
+        // Fall back to REST API with caching
+        return await this.getCachedData(
+            `price_${symbol}`,
+            () => RealTimeData.getStockPrice(symbol),
+            this.dataCache.prices
+        );
+    },
+    
+    /**
      * Scan a single symbol for opportunities
      */
     async scanSymbol(symbol) {
         try {
-            // Get current stock price (with caching)
-            const stockData = await this.getCachedData(
-                `price_${symbol}`,
-                () => RealTimeData.getStockPrice(symbol),
-                this.dataCache.prices
-            );
+            // Get current stock price (WebSocket first, REST API fallback with caching)
+            const stockData = await this.getStockPrice(symbol);
             if (!stockData || !stockData.price) {
                 console.log(`   ⚠️ ${symbol}: No price data`);
                 return null;
