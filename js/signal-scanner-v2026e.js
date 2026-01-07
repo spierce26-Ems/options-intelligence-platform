@@ -348,14 +348,19 @@ const SignalScanner = {
         }
         
         // Average IV of ATM options
-        // CRITICAL FIX: Don't multiply by 1000, just by 100
+        // CRITICAL FIX: Check if API returns decimal (0.47) or percentage (47)
         const avgIV = atmOptions.reduce((sum, opt) => {
-            const iv = opt.iv || opt.impliedVolatility || opt.implied_volatility || 0.30;
+            let iv = opt.iv || opt.impliedVolatility || opt.implied_volatility || 0.30;
+            // If IV > 1, it's already a percentage (e.g., 47), keep as-is
+            // If IV < 1, it's decimal (e.g., 0.47), convert to percentage
+            if (iv < 1) {
+                iv = iv * 100;
+            }
             return sum + iv;
         }, 0) / atmOptions.length;
         
-        // Return as percentage (multiply by 100, then round to 1 decimal)
-        return Math.round(avgIV * 100 * 10) / 10;
+        // Already in percentage form, just round to 1 decimal
+        return Math.round(avgIV * 10) / 10;
     },
     
     /**
