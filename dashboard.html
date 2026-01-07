@@ -470,7 +470,10 @@
     <script src="js/data.js"></script>
     <script src="js/calculations.js"></script>
     <script src="js/massive-historical-data-v2026.js"></script>
-    <script src="js/iv-rank-engine.js"></script>
+    
+    <!-- ✅ SIMPLE STRATEGIES ONLY (v2.0) - Long Call/Put, Short Call/Put -->
+    <script src="js/iv-rank-engine-simple.js"></script>
+    
     <script src="js/backtest-engine.js"></script>
     
     <!-- 🚀 NEW: WebSocket Client for Real-Time Data -->
@@ -607,6 +610,10 @@
                             <div class="signal-detail-value">${signal.strategy}</div>
                         </div>
                         <div class="signal-detail">
+                            <div class="signal-detail-label">Strike Price</div>
+                            <div class="signal-detail-value">$${signal.trade ? signal.trade.strike : 'N/A'}</div>
+                        </div>
+                        <div class="signal-detail">
                             <div class="signal-detail-label">IV Rank</div>
                             <div class="signal-detail-value">${signal.ivRank.toFixed(1)}%</div>
                         </div>
@@ -615,12 +622,16 @@
                             <div class="signal-detail-value">${(signal.currentIV > 100 ? signal.currentIV / 100 : signal.currentIV).toFixed(1)}%</div>
                         </div>
                         <div class="signal-detail">
-                            <div class="signal-detail-label">Confidence</div>
-                            <div class="signal-detail-value">${signal.confidence}%</div>
+                            <div class="signal-detail-label">Premium</div>
+                            <div class="signal-detail-value">$${signal.trade ? (signal.action === 'BUY' ? signal.trade.costPer1Contract : signal.trade.creditPer1Contract) : 'N/A'}</div>
                         </div>
                         <div class="signal-detail">
-                            <div class="signal-detail-label">Backtest Win Rate</div>
-                            <div class="signal-detail-value">${signal.backtest ? signal.backtest.winRate.toFixed(1) + '%' : 'N/A'}</div>
+                            <div class="signal-detail-label">Max ${signal.action === 'BUY' ? 'Risk' : 'Profit'}</div>
+                            <div class="signal-detail-value">${signal.trade ? (signal.action === 'BUY' ? '$' + signal.trade.maxLoss : '$' + signal.trade.maxProfit) : 'N/A'}</div>
+                        </div>
+                        <div class="signal-detail">
+                            <div class="signal-detail-label">Confidence</div>
+                            <div class="signal-detail-value">${signal.confidence}%</div>
                         </div>
                         <div class="signal-detail">
                             <div class="signal-detail-label">Current Price</div>
