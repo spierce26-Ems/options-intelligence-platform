@@ -472,18 +472,63 @@
     <script src="js/massive-historical-data-v2026.js"></script>
     <script src="js/iv-rank-engine.js"></script>
     <script src="js/backtest-engine.js"></script>
-    ```html
-<script src="js/massive-websocket.js"></script>
-```
+    
+    <!-- 🚀 NEW: WebSocket Client for Real-Time Data -->
+    <script src="js/massive-websocket.js"></script>
+    
     <script src="js/signal-scanner-v2026.js"></script>
     <script src="js/position-manager.js"></script>
 
     <script>
+        // 🚀 WebSocket connection for real-time data
+        let massiveWS = null;
+
+        async function initializeWebSocket() {
+            try {
+                console.log('🔌 Initializing Massive WebSocket...');
+                
+                // Get API key from RealTimeData
+                const apiKey = RealTimeData.apis.polygon.apiKey;
+                
+                if (!apiKey || apiKey === 'YOUR_NEW_API_KEY_HERE') {
+                    console.warn('⚠️ No API key configured, WebSocket disabled');
+                    return;
+                }
+                
+                // Create WebSocket client
+                massiveWS = new MassiveWebSocket(apiKey);
+                
+                // Connect and authenticate
+                await massiveWS.connect();
+                
+                // Subscribe to watchlist
+                const watchlist = SignalScanner.watchlist;
+                massiveWS.subscribe(watchlist);
+                
+                console.log('✅ Massive WebSocket ready!');
+                console.log(`📡 Subscribed to ${watchlist.length} stocks for real-time updates`);
+                
+                // Optional: Set up price update handler
+                massiveWS.onPriceUpdate = (priceData) => {
+                    // console.log(`📊 Price update: ${priceData.symbol} = $${priceData.price.toFixed(2)}`);
+                    // Could trigger UI updates here in the future
+                };
+                
+            } catch (error) {
+                console.error('❌ WebSocket initialization failed:', error);
+                console.log('⚠️ Falling back to REST API for data');
+                massiveWS = null; // Ensure it's null so we fall back to REST
+            }
+        }
+
         // Initialize dashboard on load
-        window.addEventListener('load', () => {
+        window.addEventListener('load', async () => {
             console.log('🚀 Trading Dashboard loaded');
             updateStats();
             refreshPositions();
+            
+            // Initialize WebSocket for real-time data
+            await initializeWebSocket();
         });
 
         // Tab navigation
