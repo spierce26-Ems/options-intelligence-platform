@@ -122,9 +122,10 @@ const SignalScanner = {
                 
                 // Rate limiting - UNLIMITED PLAN (Options Starter $29/mo)
                 // But respecting BURST limits to avoid temporary throttling
-                // Increased to 1000ms (1 second) to completely avoid 429 errors
-                // This is conservative but ensures 100% reliability
-                await this.sleep(1000);
+                // Increased to 3000ms (3 seconds) to GUARANTEE no burst limit hits
+                // With 3 API calls per stock, this gives ~9 seconds per 3 calls
+                // Conservative but 100% reliable (10 calls per 10 seconds max)
+                await this.sleep(3000);
                 
                 // Light rate limit check (mainly for safety)
                 await this.checkRateLimit();
