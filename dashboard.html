@@ -398,9 +398,45 @@
         <!-- Today's Opportunities Section -->
         <div class="section" id="signalsSection">
             <div class="section-header">
-                <div>
+                <div style="flex: 1;">
                     <div class="section-title">🎯 Today's Opportunities</div>
                     <div class="section-subtitle">High-probability setups based on IV Rank analysis</div>
+                    
+                    <!-- Ticker Search -->
+                    <div style="margin-top: 16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                        <input 
+                            type="text" 
+                            id="tickerInput" 
+                            placeholder="Search ticker (e.g., AAPL, TSLA)..." 
+                            style="
+                                flex: 1;
+                                min-width: 200px;
+                                max-width: 300px;
+                                padding: 10px 16px;
+                                background: #1a1a1a;
+                                border: 1px solid #333;
+                                border-radius: 8px;
+                                color: #fff;
+                                font-size: 14px;
+                            "
+                            onkeypress="if(event.key==='Enter') scanTicker()"
+                        />
+                        <button class="btn-secondary btn" onclick="scanTicker()" style="white-space: nowrap;">
+                            + Add Ticker
+                        </button>
+                    </div>
+                    
+                    <!-- Quick Add Buttons -->
+                    <div style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                        <span style="color: #888; font-size: 12px;">Quick:</span>
+                        <button class="btn-secondary btn" onclick="scanTickerDirect('AAPL')" style="padding: 4px 12px; font-size: 12px;">AAPL</button>
+                        <button class="btn-secondary btn" onclick="scanTickerDirect('TSLA')" style="padding: 4px 12px; font-size: 12px;">TSLA</button>
+                        <button class="btn-secondary btn" onclick="scanTickerDirect('NVDA')" style="padding: 4px 12px; font-size: 12px;">NVDA</button>
+                        <button class="btn-secondary btn" onclick="scanTickerDirect('AMD')" style="padding: 4px 12px; font-size: 12px;">AMD</button>
+                        <button class="btn-secondary btn" onclick="scanTickerDirect('MSFT')" style="padding: 4px 12px; font-size: 12px;">MSFT</button>
+                        <button class="btn-secondary btn" onclick="scanTickerDirect('GOOGL')" style="padding: 4px 12px; font-size: 12px;">GOOGL</button>
+                        <button class="btn-secondary btn" onclick="scanTickerDirect('AMZN')" style="padding: 4px 12px; font-size: 12px;">AMZN</button>
+                    </div>
                 </div>
                 <button class="btn" onclick="scanMarket()" id="scanBtn">
                     Scan Market
@@ -531,9 +567,124 @@
             updateStats();
             refreshPositions();
             
+            // Load custom watchlist
+            const savedWatchlist = localStorage.getItem('customWatchlist');
+            if (savedWatchlist) {
+                try {
+                    const customList = JSON.parse(savedWatchlist);
+                    SignalScanner.watchlist = [...new Set([...SignalScanner.watchlist, ...customList])];
+                    console.log(`✅ Loaded custom watchlist (${SignalScanner.watchlist.length} total stocks)`);
+                } catch (error) {
+                    console.warn('Could not load custom watchlist:', error);
+                }
+            }
+            
             // Initialize WebSocket for real-time data
             await initializeWebSocket();
         });
+
+        // Scan a specific ticker
+        async function scanTicker() {
+            const input = document.getElementById('tickerInput');
+            const ticker = input.value.trim().toUpperCase();
+            
+            if (!ticker) {
+                alert('⚠️ Please enter a ticker symbol');
+                return;
+            }
+            
+            if (!/^[A-Z]{1,5}$/.test(ticker)) {
+                alert('⚠️ Invalid ticker format. Use 1-5 letters (e.g., AAPL, TSLA)');
+                return;
+            }
+            
+            await scanTickerDirect(ticker);
+            input.value = ''; // Clear input
+        }
+
+        // Scan ticker directly (for quick-add buttons)
+        async function scanTickerDirect(ticker) {
+            const container = document.getElementById('signalsContainer');
+            
+            // Show loading
+            container.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <div>Analyzing ${ticker}...</div>
+                </div>
+            `;
+            
+            try {
+                console.log(`🔍 Scanning ${ticker}...`);
+                
+                // Scan single symbol
+                const signal = await SignalScanner.scanSymbol(ticker);
+                
+                if (!signal) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">ℹ️</div>
+                            <div class="empty-state-title">No signal for ${ticker}</div>
+                            <div>IV Rank is in neutral range (30-70%). Wait for extremes.</div>
+                            <button class="btn" onclick="addToWatchlist('${ticker}')" style="margin-top: 16px;">
+                                Add ${ticker} to Watchlist
+                            </button>
+                            <button class="btn-secondary btn" onclick="scanMarket()" style="margin-top: 8px;">
+                                Back to Market Scan
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Display the signal
+                displaySignals([signal]);
+                
+                // Add action buttons
+                const actionButtons = document.createElement('div');
+                actionButtons.style.cssText = 'text-align: center; margin-top: 20px; padding: 20px; background: #1a1a1a; border-radius: 8px;';
+                actionButtons.innerHTML = `
+                    <button class="btn" onclick="addToWatchlist('${ticker}')" style="margin-right: 12px;">
+                        + Add ${ticker} to Watchlist
+                    </button>
+                    <button class="btn-secondary btn" onclick="scanMarket()">
+                        Back to Market Scan
+                    </button>
+                `;
+                container.appendChild(actionButtons);
+                
+                updateStats();
+                console.log(`✅ ${ticker} signal generated`);
+                
+            } catch (error) {
+                console.error(`❌ Error scanning ${ticker}:`, error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">❌</div>
+                        <div class="empty-state-title">Error scanning ${ticker}</div>
+                        <div>${error.message}</div>
+                        <button class="btn-secondary btn" onclick="scanMarket()" style="margin-top: 16px;">
+                            Back to Market Scan
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Add ticker to watchlist
+        function addToWatchlist(ticker) {
+            ticker = ticker.toUpperCase();
+            if (!SignalScanner.watchlist.includes(ticker)) {
+                SignalScanner.watchlist.push(ticker);
+                
+                // Save to localStorage
+                localStorage.setItem('customWatchlist', JSON.stringify(SignalScanner.watchlist));
+                
+                alert(`✅ ${ticker} added to watchlist!\n\nYour watchlist now has ${SignalScanner.watchlist.length} stocks:\n${SignalScanner.watchlist.join(', ')}`);
+            } else {
+                alert(`ℹ️ ${ticker} is already in your watchlist`);
+            }
+        }
 
         // Tab navigation
         function showTab(tabName) {
