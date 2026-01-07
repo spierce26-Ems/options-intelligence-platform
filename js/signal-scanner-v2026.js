@@ -16,18 +16,26 @@
 
 const SignalScanner = {
     // Default watchlist (can be customized)
-    // REDUCED TO 20 STOCKS to avoid 429 errors while testing
-    // Once fixes are verified, you can expand back to 70 stocks
+    // REDUCED TO 10 STOCKS to avoid 429 errors during testing
+    // Once API key fully activates, can expand back to 20-70 stocks
     watchlist: [
-        // Major Index ETFs (5)
+        // Major Index ETFs (5) - Most liquid, highest priority
         'SPY', 'QQQ', 'IWM', 'DIA', 'VTI',
         
-        // Tech Mega-Caps (10) - High liquidity
-        'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META',
-        'NVDA', 'TSLA', 'AMD', 'NFLX', 'CRM',
+        // Top 5 High-Probability Stocks
+        'AAPL',  // Apple - Mega cap, high liquidity
+        'NVDA',  // NVIDIA - High vol, AI leader
+        'TSLA',  // Tesla - High vol, popular
+        'JPM',   // JP Morgan - Banking sector
+        'META'   // Meta - Social media, high vol
         
-        // Financials (5) - Good for testing
-        'JPM', 'BAC', 'GS', 'C', 'WFC'
+        // COMMENTED OUT - Expand after validation
+        /*
+        // More Tech Mega-Caps
+        'MSFT', 'GOOGL', 'AMZN', 'AMD', 'NFLX', 'CRM',
+        
+        // More Financials
+        'BAC', 'GS', 'C', 'WFC'
         
         // COMMENT OUT THE REST TO AVOID 429 ERRORS DURING TESTING
         /*
@@ -121,10 +129,10 @@ const SignalScanner = {
                 }
                 
                 // Rate limiting - UNLIMITED PLAN (Options Starter $29/mo)
-                // But respecting BURST limits to avoid temporary throttling
-                // Increased to 3000ms (3 seconds) to GUARANTEE no burst limit hits
-                // With 3 API calls per stock, this gives ~9 seconds per 3 calls
-                // Conservative but 100% reliable (10 calls per 10 seconds max)
+                // Official docs: UNLIMITED, but experiencing 429s with 1000ms
+                // Likely: Undocumented burst limits or new key activation pending
+                // Using 3000ms (3 seconds) as proven conservative delay
+                // This worked in earlier tests - scan time: 60 seconds
                 await this.sleep(3000);
                 
                 // Light rate limit check (mainly for safety)
