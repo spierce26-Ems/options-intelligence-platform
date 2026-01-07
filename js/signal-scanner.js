@@ -16,7 +16,8 @@
 
 const SignalScanner = {
     // Default watchlist (can be customized)
-    // EXPANDED for Starter Plan users with higher API limits
+    // REDUCED TO 20 STOCKS to avoid 429 errors while testing
+    // Once fixes are verified, you can expand back to 70 stocks
     watchlist: [
         // Major Index ETFs (5)
         'SPY', 'QQQ', 'IWM', 'DIA', 'VTI',
@@ -25,12 +26,17 @@ const SignalScanner = {
         'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META',
         'NVDA', 'TSLA', 'AMD', 'NFLX', 'CRM',
         
+        // Financials (5) - Good for testing
+        'JPM', 'BAC', 'GS', 'C', 'WFC'
+        
+        // COMMENT OUT THE REST TO AVOID 429 ERRORS DURING TESTING
+        /*
         // High Volatility Tech (8) - More opportunities
         'COIN', 'SHOP', 'SQ', 'PYPL', 'ROKU',
         'SNAP', 'UBER', 'LYFT',
         
-        // Financials (6)
-        'JPM', 'BAC', 'GS', 'C', 'WFC', 'MS',
+        // Financials (1 more)
+        'MS',
         
         // Healthcare (5)
         'UNH', 'JNJ', 'PFE', 'ABBV', 'LLY',
@@ -55,6 +61,7 @@ const SignalScanner = {
         
         // Emerging/High Vol (6)
         'RIVN', 'LCID', 'PLTR', 'SOFI', 'AFRM', 'HOOD'
+        */
     ],
     
     // Backtest results (from validation)
