@@ -240,7 +240,8 @@ const IVRankEngine = {
         const strike = roundToStrike(stockPrice * 1.05);
         
         // Estimate premium: Stock Price * IV * sqrt(DTE/365) * 0.4
-        const estimatedPremium = stockPrice * (currentIV / 100) * Math.sqrt(dte / 365) * 0.4;
+        const ivDecimal = currentIV / 100;
+        const estimatedPremium = stockPrice * ivDecimal * Math.sqrt(dte / 365) * 0.4;
         
         return {
             type: 'Long Call',
@@ -278,7 +279,8 @@ const IVRankEngine = {
         const strike = roundToStrike(stockPrice * 0.95);
         
         // Estimate premium: Stock Price * IV * sqrt(DTE/365) * 0.4
-        const estimatedPremium = stockPrice * (currentIV / 100) * Math.sqrt(dte / 365) * 0.4;
+        const ivDecimal = currentIV / 100;
+        const estimatedPremium = stockPrice * ivDecimal * Math.sqrt(dte / 365) * 0.4;
         
         return {
             type: 'Long Put',
@@ -316,7 +318,11 @@ const IVRankEngine = {
         const strike = roundToStrike(stockPrice * 1.10);
         
         // Estimate premium: Stock Price * IV * sqrt(DTE/365) * 0.35
-        const estimatedPremium = stockPrice * (currentIV / 100) * Math.sqrt(dte / 365) * 0.35;
+        // currentIV should be in percentage form (e.g., 47.0 for 47%)
+        const ivDecimal = currentIV / 100; // Convert percentage to decimal
+        const estimatedPremium = stockPrice * ivDecimal * Math.sqrt(dte / 365) * 0.35;
+        
+        console.log(`   ${strike} Call: Stock=$${stockPrice.toFixed(2)}, IV=${currentIV.toFixed(1)}%, Premium/share=$${estimatedPremium.toFixed(2)}, Per contract=$${Math.round(estimatedPremium * 100)}`);
         
         return {
             type: 'Short Call',
@@ -355,7 +361,11 @@ const IVRankEngine = {
         const strike = roundToStrike(stockPrice * 0.90);
         
         // Estimate premium: Stock Price * IV * sqrt(DTE/365) * 0.35
-        const estimatedPremium = stockPrice * (currentIV / 100) * Math.sqrt(dte / 365) * 0.35;
+        // currentIV should be in percentage form (e.g., 47.0 for 47%)
+        const ivDecimal = currentIV / 100; // Convert percentage to decimal
+        const estimatedPremium = stockPrice * ivDecimal * Math.sqrt(dte / 365) * 0.35;
+        
+        console.log(`   ${strike} Put: Stock=$${stockPrice.toFixed(2)}, IV=${currentIV.toFixed(1)}%, Premium/share=$${estimatedPremium.toFixed(2)}, Per contract=$${Math.round(estimatedPremium * 100)}`);
         
         return {
             type: 'Short Put',
