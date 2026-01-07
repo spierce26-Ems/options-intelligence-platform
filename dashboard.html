@@ -622,12 +622,16 @@
                             <div class="signal-detail-value">${(signal.currentIV > 100 ? signal.currentIV / 100 : signal.currentIV).toFixed(1)}%</div>
                         </div>
                         <div class="signal-detail">
-                            <div class="signal-detail-label">Premium</div>
+                            <div class="signal-detail-label">${signal.action === 'BUY' ? 'Cost' : 'Credit'} (1 Contract)</div>
                             <div class="signal-detail-value">$${signal.trade ? (signal.action === 'BUY' ? signal.trade.costPer1Contract : signal.trade.creditPer1Contract) : 'N/A'}</div>
                         </div>
                         <div class="signal-detail">
                             <div class="signal-detail-label">Max ${signal.action === 'BUY' ? 'Risk' : 'Profit'}</div>
                             <div class="signal-detail-value">${signal.trade ? (signal.action === 'BUY' ? '$' + signal.trade.maxLoss : '$' + signal.trade.maxProfit) : 'N/A'}</div>
+                        </div>
+                        <div class="signal-detail">
+                            <div class="signal-detail-label">Days to Expiration</div>
+                            <div class="signal-detail-value">${signal.trade ? signal.trade.dte + ' days' : 'N/A'}</div>
                         </div>
                         <div class="signal-detail">
                             <div class="signal-detail-label">Confidence</div>
