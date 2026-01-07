@@ -612,7 +612,7 @@
                         </div>
                         <div class="signal-detail">
                             <div class="signal-detail-label">Current IV</div>
-                            <div class="signal-detail-value">${signal.currentIV.toFixed(1)}%</div>
+                            <div class="signal-detail-value">${(signal.currentIV > 100 ? signal.currentIV / 100 : signal.currentIV).toFixed(1)}%</div>
                         </div>
                         <div class="signal-detail">
                             <div class="signal-detail-label">Confidence</div>
@@ -891,7 +891,7 @@
                     </div>
                     <div style="background: #0a0a0a; padding: 15px; border-radius: 8px; border: 1px solid #222;">
                         <div style="color: #888; font-size: 12px; margin-bottom: 5px;">CURRENT IV</div>
-                        <div style="font-size: 24px; font-weight: 700;">${signal.currentIV}%</div>
+                        <div style="font-size: 24px; font-weight: 700;">${(signal.currentIV > 100 ? signal.currentIV / 100 : signal.currentIV).toFixed(1)}%</div>
                     </div>
                 </div>
                 
