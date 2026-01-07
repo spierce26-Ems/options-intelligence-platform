@@ -8,7 +8,7 @@ const RealTimeData = {
     apis: {
         polygon: {
             enabled: true, // Enable Massive.com API
-            apiKey: 'i4uMiWTkCkQqeUwrFpUJpCwbOXfh5k4b', // Your Massive.com API key
+            apiKey: 'vCDBKfeo1Xt3wYpUeKl0gtVgUhEBAmZu', // Your NEW Massive.com API key (Options Starter - Regenerated Jan 7, 2026)
             baseUrl: 'https://api.polygon.io'
         },
         tradier: {
