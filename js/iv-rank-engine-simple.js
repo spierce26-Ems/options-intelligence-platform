@@ -247,10 +247,10 @@ const IVRankEngine = {
             action: 'BUY',
             dte: dte,
             strike: strike,
-            estimatedPremium: Math.round(estimatedPremium * 100), // Per share
-            costPer1Contract: Math.round(estimatedPremium * 100 * 100), // 100 shares per contract
+            estimatedPremium: Math.round(estimatedPremium * 100) / 100, // Per share in dollars
+            costPer1Contract: Math.round(estimatedPremium * 100), // 100 shares per contract
             maxProfit: 'Unlimited',
-            maxLoss: Math.round(estimatedPremium * 100 * 100), // Cost of premium
+            maxLoss: Math.round(estimatedPremium * 100), // Cost of premium
             breakeven: strike + estimatedPremium,
             targetProfit: '50-100%',
             targetDays: 30,
@@ -261,7 +261,7 @@ const IVRankEngine = {
                 optionType: 'CALL',
                 strike: strike,
                 expiration: this.getExpirationDate(dte),
-                estimatedCost: Math.round(estimatedPremium * 100 * 100)
+                estimatedCost: Math.round(estimatedPremium * 100)
             }
         };
     },
@@ -285,10 +285,10 @@ const IVRankEngine = {
             action: 'BUY',
             dte: dte,
             strike: strike,
-            estimatedPremium: Math.round(estimatedPremium * 100), // Per share
-            costPer1Contract: Math.round(estimatedPremium * 100 * 100), // 100 shares per contract
-            maxProfit: strike - estimatedPremium, // Max profit if stock goes to $0
-            maxLoss: Math.round(estimatedPremium * 100 * 100), // Cost of premium
+            estimatedPremium: Math.round(estimatedPremium * 100) / 100, // Per share in dollars
+            costPer1Contract: Math.round(estimatedPremium * 100), // 100 shares per contract
+            maxProfit: Math.round((strike - estimatedPremium) * 100), // Max profit if stock goes to $0
+            maxLoss: Math.round(estimatedPremium * 100), // Cost of premium
             breakeven: strike - estimatedPremium,
             targetProfit: '50-100%',
             targetDays: 30,
@@ -299,7 +299,7 @@ const IVRankEngine = {
                 optionType: 'PUT',
                 strike: strike,
                 expiration: this.getExpirationDate(dte),
-                estimatedCost: Math.round(estimatedPremium * 100 * 100)
+                estimatedCost: Math.round(estimatedPremium * 100)
             }
         };
     },
@@ -323,9 +323,9 @@ const IVRankEngine = {
             action: 'SELL',
             dte: dte,
             strike: strike,
-            estimatedPremium: Math.round(estimatedPremium * 100), // Per share
-            creditPer1Contract: Math.round(estimatedPremium * 100 * 100), // 100 shares per contract
-            maxProfit: Math.round(estimatedPremium * 100 * 100), // Premium collected
+            estimatedPremium: Math.round(estimatedPremium * 100) / 100, // Per share in dollars
+            creditPer1Contract: Math.round(estimatedPremium * 100), // 100 shares per contract
+            maxProfit: Math.round(estimatedPremium * 100), // Premium collected
             maxLoss: 'Unlimited (if stock rises above strike)',
             breakeven: strike + estimatedPremium,
             targetProfit: '50%',
@@ -338,7 +338,7 @@ const IVRankEngine = {
                 optionType: 'CALL',
                 strike: strike,
                 expiration: this.getExpirationDate(dte),
-                estimatedCredit: Math.round(estimatedPremium * 100 * 100)
+                estimatedCredit: Math.round(estimatedPremium * 100)
             }
         };
     },
@@ -362,10 +362,10 @@ const IVRankEngine = {
             action: 'SELL',
             dte: dte,
             strike: strike,
-            estimatedPremium: Math.round(estimatedPremium * 100), // Per share
-            creditPer1Contract: Math.round(estimatedPremium * 100 * 100), // 100 shares per contract
-            maxProfit: Math.round(estimatedPremium * 100 * 100), // Premium collected
-            maxLoss: (strike - estimatedPremium) * 100, // If stock drops to $0
+            estimatedPremium: Math.round(estimatedPremium * 100) / 100, // Per share in dollars
+            creditPer1Contract: Math.round(estimatedPremium * 100), // 100 shares per contract
+            maxProfit: Math.round(estimatedPremium * 100), // Premium collected
+            maxLoss: Math.round((strike - estimatedPremium) * 100), // If stock drops to $0
             breakeven: strike - estimatedPremium,
             targetProfit: '50%',
             targetDays: 21,
@@ -377,7 +377,7 @@ const IVRankEngine = {
                 optionType: 'PUT',
                 strike: strike,
                 expiration: this.getExpirationDate(dte),
-                estimatedCredit: Math.round(estimatedPremium * 100 * 100)
+                estimatedCredit: Math.round(estimatedPremium * 100)
             }
         };
     },
