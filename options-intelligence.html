@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Options Intelligence Screener</title>
+    <link rel="stylesheet" href="css/options-intelligence.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1>📊 Options Intelligence Screener</h1>
+                <p>Advanced options analysis powered by smart scoring algorithms</p>
+            </div>
+            <button class="api-setup-btn" onclick="toggleAPISetup()">⚙️ E*TRADE Setup</button>
+        </header>
+
+        <!-- API Setup Panel (Collapsible) -->
+        <div id="apiSetup" class="api-setup-panel" style="display: none;">
+            <h3>E*TRADE API Configuration</h3>
+            <div class="api-form">
+                <div class="form-group">
+                    <label>Consumer Key:</label>
+                    <input type="text" id="consumerKey" placeholder="Enter your E*TRADE Consumer Key">
+                </div>
+                <div class="form-group">
+                    <label>Consumer Secret:</label>
+                    <input type="password" id="consumerSecret" placeholder="Enter your E*TRADE Consumer Secret">
+                </div>
+                <div class="form-actions">
+                    <button onclick="saveAPIConfig()" class="btn-primary">💾 Save Configuration</button>
+                    <button onclick="testConnection()" class="btn-secondary">🔌 Test Connection</button>
+                </div>
+                <div id="apiStatus" class="api-status"></div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            
+            <!-- Strategy Selector -->
+            <section class="strategy-section">
+                <h2>🎯 Select Your Strategy</h2>
+                <div class="strategy-grid">
+                    <div class="strategy-card" onclick="selectStrategy('momentum')">
+                        <div class="strategy-icon">🚀</div>
+                        <h3>Momentum Plays</h3>
+                        <p>High IV + Strong technicals + Catalysts</p>
+                        <div class="strategy-tags">
+                            <span class="tag">High Risk</span>
+                            <span class="tag">High Reward</span>
+                        </div>
+                    </div>
+                    <div class="strategy-card" onclick="selectStrategy('value')">
+                        <div class="strategy-icon">💎</div>
+                        <h3>Value Opportunities</h3>
+                        <p>Low IV + Oversold + Strong fundamentals</p>
+                        <div class="strategy-tags">
+                            <span class="tag">Moderate Risk</span>
+                            <span class="tag">Good Value</span>
+                        </div>
+                    </div>
+                    <div class="strategy-card" onclick="selectStrategy('income')">
+                        <div class="strategy-icon">💰</div>
+                        <h3>Income Generation</h3>
+                        <p>High premiums + Safe strikes + Consistency</p>
+                        <div class="strategy-tags">
+                            <span class="tag">Lower Risk</span>
+                            <span class="tag">Steady Income</span>
+                        </div>
+                    </div>
+                    <div class="strategy-card" onclick="selectStrategy('swing')">
+                        <div class="strategy-icon">📈</div>
+                        <h3>Swing Trades</h3>
+                        <p>Optimal DTE + Risk/Reward + Liquidity</p>
+                        <div class="strategy-tags">
+                            <span class="tag">Balanced</span>
+                            <span class="tag">Short-term</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Advanced Filters -->
+            <section class="filters-section">
+                <h2>🔍 Advanced Filters</h2>
+                <div class="filters-container">
+                    <div class="filter-group">
+                        <label>Market Cap</label>
+                        <select id="filterMarketCap">
+                            <option value="all">All Sizes</option>
+                            <option value="mega">Mega Cap ($200B+)</option>
+                            <option value="large" selected>Large Cap ($10B-$200B)</option>
+                            <option value="mid">Mid Cap ($2B-$10B)</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Delta Range</label>
+                        <div class="range-inputs">
+                            <input type="number" id="deltaMin" value="0.50" step="0.05" min="0.05" max="0.95">
+                            <span>to</span>
+                            <input type="number" id="deltaMax" value="0.70" step="0.05" min="0.05" max="0.95">
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Days to Expiration</label>
+                        <div class="range-inputs">
+                            <input type="number" id="dteMin" value="30" step="5" min="7" max="180">
+                            <span>to</span>
+                            <input type="number" id="dteMax" value="60" step="5" min="7" max="180">
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Premium Range ($)</label>
+                        <div class="range-inputs">
+                            <input type="number" id="premiumMin" value="1.00" step="0.50" min="0.50">
+                            <span>to</span>
+                            <input type="number" id="premiumMax" value="5.00" step="0.50" min="0.50">
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>IV Percentile</label>
+                        <div class="range-inputs">
+                            <input type="number" id="ivMin" value="20" step="5" min="0" max="100">
+                            <span>to</span>
+                            <input type="number" id="ivMax" value="50" step="5" min="0" max="100">
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Min Open Interest</label>
+                        <input type="number" id="minOI" value="1000" step="100" min="100">
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Max Bid-Ask Spread</label>
+                        <input type="number" id="maxSpread" value="0.15" step="0.05" min="0.05">
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Min Volume</label>
+                        <input type="number" id="minVolume" value="500" step="100" min="100">
+                    </div>
+                </div>
+
+                <div class="scan-actions">
+                    <button onclick="runScan()" class="btn-scan">🔎 Scan for Opportunities</button>
+                    <button onclick="resetFilters()" class="btn-reset">↺ Reset Filters</button>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section" id="resultsSection" style="display: none;">
+                <div class="results-header">
+                    <h2>📊 Top Opportunities</h2>
+                    <div class="results-stats" id="resultsStats"></div>
+                </div>
+
+                <!-- Results Table -->
+                <div class="table-container">
+                    <table class="results-table" id="resultsTable">
+                        <thead>
+                            <tr>
+                                <th onclick="sortBy('score')">Score ⬍</th>
+                                <th onclick="sortBy('ticker')">Ticker ⬍</th>
+                                <th onclick="sortBy('price')">Stock Price ⬍</th>
+                                <th onclick="sortBy('strike')">Strike ⬍</th>
+                                <th onclick="sortBy('expiration')">Expiration ⬍</th>
+                                <th onclick="sortBy('premium')">Premium ⬍</th>
+                                <th onclick="sortBy('delta')">Delta ⬍</th>
+                                <th onclick="sortBy('iv')">IV % ⬍</th>
+                                <th onclick="sortBy('ivRank')">IV Rank ⬍</th>
+                                <th onclick="sortBy('breakeven')">Break-even ⬍</th>
+                                <th onclick="sortBy('probability')">Win % ⬍</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsBody">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Detailed Analysis Modal -->
+            <div id="analysisModal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <span class="close" onclick="closeModal()">&times;</span>
+                    <div id="analysisContent"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="js/options-intelligence.js"></script>
+</body>
+</html>
