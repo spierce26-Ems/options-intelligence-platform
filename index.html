@@ -3,1075 +3,203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Options Trading Intelligence Platform - Institutional-Grade Signals</title>
+    <title>Options Intelligence Screener</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="stylesheet" href="css/financial-design-system.css">
-    <link rel="stylesheet" href="css/trading-components.css">
-    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/options-intelligence.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Navigation - Invisible until needed -->
-    <nav class="nav">
-        <div class="container">
-            <div class="nav-inner">
-                <a href="#" class="nav-logo">Options Intelligence</a>
-                <div class="nav-items">
-                    <a href="#hotpicks" class="nav-item active" data-tab="hotpicks">Hot Picks</a>
-                    <a href="#search" class="nav-item" data-tab="ticker-search">Search</a>
-                    <a href="#scanner" class="nav-item" data-tab="scanner">Scanner</a>
-                    <a href="#signals" class="nav-item" data-tab="signals">Signals</a>
-                    <a href="#strategies" class="nav-item" data-tab="strategies">Strategies</a>
-                    <a href="#portfolio" class="nav-item" data-tab="portfolio">Portfolio</a>
-                    <a href="#dividend-screener" class="nav-item" data-tab="dividend-screener">Dividend Screener</a>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1>📊 Options Intelligence Screener</h1>
+                <p>Advanced options analysis powered by smart scoring algorithms</p>
+            </div>
+            <button class="api-setup-btn" onclick="toggleAPISetup()">⚙️ E*TRADE Setup</button>
+        </header>
+
+        <!-- API Setup Panel (Collapsible) -->
+        <div id="apiSetup" class="api-setup-panel" style="display: none;">
+            <h3>E*TRADE API Configuration</h3>
+            <div class="api-form">
+                <div class="form-group">
+                    <label>Consumer Key:</label>
+                    <input type="text" id="consumerKey" placeholder="Enter your E*TRADE Consumer Key">
                 </div>
-                <div class="status-indicator status-neutral" id="marketStatus">
-                    <span class="status-dot"></span>
-                    <span>Market Closed</span>
+                <div class="form-group">
+                    <label>Consumer Secret:</label>
+                    <input type="password" id="consumerSecret" placeholder="Enter your E*TRADE Consumer Secret">
                 </div>
+                <div class="form-actions">
+                    <button onclick="saveAPIConfig()" class="btn-primary">💾 Save Configuration</button>
+                    <button onclick="testConnection()" class="btn-secondary">🔌 Test Connection</button>
+                </div>
+                <div id="apiStatus" class="api-status"></div>
             </div>
         </div>
-    </nav>
 
-    <!-- Data Source Banner -->
-    <div id="dataSourceBanner" class="data-source-banner" style="display: none;">
-        <div class="container">
-            <span id="dataSourceText"></span>
-        </div>
-    </div>
-
-    <!-- Main Content -->
-    <main class="main-content">
-        <div class="container">
+        <!-- Main Content -->
+        <div class="main-content">
             
-            <!-- Hot Picks Tab (V7 iOS-Inspired Design) -->
-            <div id="hotpicks" class="tab-content active">
-                
-                <!-- Page Header -->
-                <div class="trading-header">
-                    <div>
-                        <h1 class="trading-title">Hot Picks</h1>
-                        <p class="trading-subtitle">AI-powered opportunities with institutional-grade intelligence</p>
-                    </div>
-                    <div class="timeframe-selector">
-                        <button class="timeframe-option active" data-timeframe="short">1-7D</button>
-                        <button class="timeframe-option" data-timeframe="medium">1-4W</button>
-                        <button class="timeframe-option" data-timeframe="long">1-3M</button>
-                    </div>
-                </div>
-
-                <!-- KPI Dashboard - 4 Primary Metrics -->
-                <div class="kpi-dashboard">
-                    <div class="kpi-card-primary">
-                        <div class="kpi-label">Opportunities</div>
-                        <div class="kpi-value" id="opportunitiesCount">0</div>
-                        <div class="kpi-change neutral">
-                            <span>—</span>
+            <!-- Strategy Selector -->
+            <section class="strategy-section">
+                <h2>🎯 Select Your Strategy</h2>
+                <div class="strategy-grid">
+                    <div class="strategy-card" onclick="selectStrategy('momentum')">
+                        <div class="strategy-icon">🚀</div>
+                        <h3>Momentum Plays</h3>
+                        <p>High IV + Strong technicals + Catalysts</p>
+                        <div class="strategy-tags">
+                            <span class="tag">High Risk</span>
+                            <span class="tag">High Reward</span>
                         </div>
                     </div>
-                    <div class="kpi-card-primary">
-                        <div class="kpi-label">Avg Return</div>
-                        <div class="kpi-value" id="avgReturn">+0%</div>
-                        <div class="kpi-change neutral" id="avgReturnChange">
-                            <span>—</span>
+                    <div class="strategy-card" onclick="selectStrategy('value')">
+                        <div class="strategy-icon">💎</div>
+                        <h3>Value Opportunities</h3>
+                        <p>Low IV + Oversold + Strong fundamentals</p>
+                        <div class="strategy-tags">
+                            <span class="tag">Moderate Risk</span>
+                            <span class="tag">Good Value</span>
                         </div>
                     </div>
-                    <div class="kpi-card-primary">
-                        <div class="kpi-label">Win Rate</div>
-                        <div class="kpi-value" id="winRateKPI">0%</div>
-                        <div class="kpi-change neutral" id="winRateChange">
-                            <span>—</span>
+                    <div class="strategy-card" onclick="selectStrategy('income')">
+                        <div class="strategy-icon">💰</div>
+                        <h3>Income Generation</h3>
+                        <p>High premiums + Safe strikes + Consistency</p>
+                        <div class="strategy-tags">
+                            <span class="tag">Lower Risk</span>
+                            <span class="tag">Steady Income</span>
                         </div>
                     </div>
-                    <div class="kpi-card-primary">
-                        <div class="kpi-label">Sharpe Ratio</div>
-                        <div class="kpi-value" id="sharpeRatioKPI">0.0</div>
-                        <div class="kpi-change neutral">
-                            <span>—</span>
+                    <div class="strategy-card" onclick="selectStrategy('swing')">
+                        <div class="strategy-icon">📈</div>
+                        <h3>Swing Trades</h3>
+                        <p>Optimal DTE + Risk/Reward + Liquidity</p>
+                        <div class="strategy-tags">
+                            <span class="tag">Balanced</span>
+                            <span class="tag">Short-term</span>
                         </div>
                     </div>
                 </div>
+            </section>
 
-                <!-- World Event Analyzer - Clean, No Decoration -->
-                <div class="event-analyzer">
-                    <div class="event-analyzer-header">
-                        <h2 class="event-analyzer-title">World Event Analyzer</h2>
-                        <p class="event-analyzer-subtitle">Analyze how global events impact options opportunities</p>
-                    </div>
-                    
-                    <div class="event-input-group">
-                        <label class="event-input-label" for="eventInput">Describe a world event</label>
-                        <input 
-                            type="text" 
-                            id="eventInput" 
-                            class="event-input" 
-                            placeholder="E.g., Fed raises interest rates by 0.25%"
-                        />
-                        
-                        <div class="event-controls">
-                            <button class="button button-primary" onclick="analyzeWorldEvent()">
-                                Analyze Event
-                            </button>
-                            <button class="button button-ghost" onclick="clearEventAnalysis()">
-                                Clear
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="event-examples">
-                        <p class="examples-label">Example events:</p>
-                        <div class="example-chips">
-                            <button class="example-chip" onclick="document.getElementById('eventInput').value='Fed raises interest rates by 0.25%'">Fed raises rates</button>
-                            <button class="example-chip" onclick="document.getElementById('eventInput').value='Oil prices surge due to Middle East tensions'">Oil prices surge</button>
-                            <button class="example-chip" onclick="document.getElementById('eventInput').value='Tech regulation announcement'">Tech regulation</button>
-                            <button class="example-chip" onclick="document.getElementById('eventInput').value='China stimulus package'">China stimulus</button>
-                            <button class="example-chip" onclick="document.getElementById('eventInput').value='Strong dollar pressure'">Strong dollar</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Opportunities List -->
-                <div class="opportunities-list" id="hotPicksList">
-                    <div class="loading-state">
-                        <div class="loading-spinner"></div>
-                        <p>Analyzing opportunities with World Event Intelligence...</p>
-                    </div>
-                </div>
-
-                <!-- Backtesting Chart - One Dominant Chart -->
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <h3 class="chart-title">Backtesting Performance</h3>
-                        <div class="segmented-control">
-                            <button class="segment active" data-period="30">30D</button>
-                            <button class="segment" data-period="90">90D</button>
-                            <button class="segment" data-period="365">1Y</button>
-                        </div>
-                    </div>
-                    <canvas id="backtestChart" class="chart-canvas"></canvas>
-                </div>
-
-            </div>
-            
-            <!-- Ticker Search Tab -->
-            <div id="ticker-search" class="tab-content">
-                <div class="trading-header">
-                    <div>
-                        <h1 class="trading-title">Analyze Any Ticker</h1>
-                        <p class="trading-subtitle">Deep-dive options analysis for your specific stock</p>
-                    </div>
-                </div>
-
-                <!-- Search Box -->
-                <div class="ios-card ticker-search-box">
-                    <div class="search-container">
-                        <input 
-                            type="text" 
-                            id="tickerSearchInput" 
-                            placeholder="Enter ticker symbol (e.g., AAPL, TSLA, NVDA...)" 
-                            class="ticker-input"
-                            onkeypress="if(event.key==='Enter') searchTicker()"
-                        />
-                        <button class="search-btn" onclick="searchTicker()">
-                            <i class="fas fa-search"></i> Analyze
-                        </button>
-                    </div>
-                    <div class="search-hints">
-                        <strong>Popular tickers:</strong>
-                        <button class="hint-btn" onclick="document.getElementById('tickerSearchInput').value='AAPL'; searchTicker()">AAPL</button>
-                        <button class="hint-btn" onclick="document.getElementById('tickerSearchInput').value='TSLA'; searchTicker()">TSLA</button>
-                        <button class="hint-btn" onclick="document.getElementById('tickerSearchInput').value='NVDA'; searchTicker()">NVDA</button>
-                        <button class="hint-btn" onclick="document.getElementById('tickerSearchInput').value='SPY'; searchTicker()">SPY</button>
-                        <button class="hint-btn" onclick="document.getElementById('tickerSearchInput').value='QQQ'; searchTicker()">QQQ</button>
-                    </div>
-                </div>
-
-                <!-- Data Source Info -->
-                <div class="ios-card data-source-info">
-                    <h3><i class="fas fa-database"></i> Data Source Configuration</h3>
-                    <p class="info-text">
-                        <strong>Current Status:</strong> <span id="dataSourceStatus">Using simulated data</span>
-                    </p>
-                    <p class="info-text">
-                        To get <strong>real-time options data</strong>, configure an API key below:
-                    </p>
-                    <div class="api-config">
-                        <select id="apiProvider" class="api-select">
-                            <option value="yahoo">Yahoo Finance (Free, Limited)</option>
-                            <option value="tradier">Tradier (Free Sandbox)</option>
-                            <option value="tdameritrade">TD Ameritrade (Free)</option>
-                            <option value="polygon">Massive.com ($49/mo)</option>
+            <!-- Advanced Filters -->
+            <section class="filters-section">
+                <h2>🔍 Advanced Filters</h2>
+                <div class="filters-container">
+                    <div class="filter-group">
+                        <label>Market Cap</label>
+                        <select id="filterMarketCap">
+                            <option value="all">All Sizes</option>
+                            <option value="mega">Mega Cap ($200B+)</option>
+                            <option value="large" selected>Large Cap ($10B-$200B)</option>
+                            <option value="mid">Mid Cap ($2B-$10B)</option>
                         </select>
-                        <input 
-                            type="text" 
-                            id="apiKeyInput" 
-                            placeholder="Enter API key (leave empty for Yahoo)" 
-                            class="api-input"
-                        />
-                        <button class="action-btn primary" onclick="configureAPI()">
-                            <i class="fas fa-plug"></i> Connect
-                        </button>
                     </div>
-                    <details class="api-help">
-                        <summary>How to get API keys</summary>
-                        <ul>
-                            <li><strong>Yahoo Finance:</strong> No key needed, but limited data</li>
-                            <li><strong>Tradier:</strong> Free sandbox at <a href="https://tradier.com" target="_blank">tradier.com</a></li>
-                            <li><strong>TD Ameritrade:</strong> Free with account at <a href="https://developer.tdameritrade.com" target="_blank">developer.tdameritrade.com</a></li>
-                            <li><strong>Massive.com:</strong> Paid plans at <a href="https://massive.com" target="_blank">massive.com</a> (formerly Polygon.io)</li>
-                        </ul>
-                    </details>
-                </div>
 
-                <!-- Analysis Results -->
-                <div id="tickerAnalysisResults">
-                    <div class="empty-state-ticker">
-                        <i class="fas fa-search-dollar"></i>
-                        <h3>Enter a ticker symbol above to start analyzing</h3>
-                        <p>Get comprehensive options analysis for any stock</p>
+                    <div class="filter-group">
+                        <label>Delta Range</label>
+                        <div class="range-inputs">
+                            <input type="number" id="deltaMin" value="0.50" step="0.05" min="0.05" max="0.95">
+                            <span>to</span>
+                            <input type="number" id="deltaMax" value="0.70" step="0.05" min="0.05" max="0.95">
+                        </div>
                     </div>
-                </div>
-            </div>
-            
-            <!-- Scanner Tab -->
-            <div id="scanner" class="tab-content">
-                <div class="trading-header">
-                    <div>
-                        <h1 class="trading-title">Options Scanner</h1>
-                        <p class="trading-subtitle">Scan 1000+ stocks for the best options opportunities</p>
-                    </div>
-                </div>
 
-                <!-- Filters -->
-                <div class="card">
-                    <h3><i class="fas fa-filter"></i> Scanner Filters</h3>
-                    <div class="filters-grid">
-                        <div class="filter-group">
-                            <label>Min Volume</label>
-                            <input type="number" id="minVolume" placeholder="1000" value="1000">
-                        </div>
-                        <div class="filter-group">
-                            <label>Min Open Interest</label>
-                            <input type="number" id="minOI" placeholder="500" value="500">
-                        </div>
-                        <div class="filter-group">
-                            <label>IV Rank</label>
-                            <select id="ivRank">
-                                <option value="all">All</option>
-                                <option value="high">High (>75)</option>
-                                <option value="medium">Medium (50-75)</option>
-                                <option value="low">Low (<50)</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label>Days to Expiration</label>
-                            <select id="dteFilter">
-                                <option value="all">All</option>
-                                <option value="0-7">0-7 days</option>
-                                <option value="8-30">8-30 days</option>
-                                <option value="31-60">31-60 days</option>
-                                <option value="60+">60+ days</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label>Option Type</label>
-                            <select id="optionType">
-                                <option value="all">All</option>
-                                <option value="calls">Calls Only</option>
-                                <option value="puts">Puts Only</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label>Signal Type</label>
-                            <select id="signalType">
-                                <option value="all">All Signals</option>
-                                <option value="unusual">Unusual Activity</option>
-                                <option value="earnings">Earnings Plays</option>
-                                <option value="volatility">Volatility</option>
-                                <option value="technical">Technical</option>
-                            </select>
+                    <div class="filter-group">
+                        <label>Days to Expiration</label>
+                        <div class="range-inputs">
+                            <input type="number" id="dteMin" value="30" step="5" min="7" max="180">
+                            <span>to</span>
+                            <input type="number" id="dteMax" value="60" step="5" min="7" max="180">
                         </div>
                     </div>
-                    <button class="btn btn-primary" id="scanBtn">
-                        <i class="fas fa-sync"></i> Scan Options
-                    </button>
-                </div>
 
-                <!-- Top Opportunities -->
-                <div class="card">
-                    <h3><i class="fas fa-trophy"></i> Top Opportunities Today</h3>
-                    <div id="topOpportunities" class="opportunities-grid">
-                        <div class="loading">Scanning options chains...</div>
+                    <div class="filter-group">
+                        <label>Premium Range ($)</label>
+                        <div class="range-inputs">
+                            <input type="number" id="premiumMin" value="1.00" step="0.50" min="0.50">
+                            <span>to</span>
+                            <input type="number" id="premiumMax" value="5.00" step="0.50" min="0.50">
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>IV Percentile</label>
+                        <div class="range-inputs">
+                            <input type="number" id="ivMin" value="20" step="5" min="0" max="100">
+                            <span>to</span>
+                            <input type="number" id="ivMax" value="50" step="5" min="0" max="100">
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Min Open Interest</label>
+                        <input type="number" id="minOI" value="1000" step="100" min="100">
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Max Bid-Ask Spread</label>
+                        <input type="number" id="maxSpread" value="0.15" step="0.05" min="0.05">
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Min Volume</label>
+                        <input type="number" id="minVolume" value="500" step="100" min="100">
                     </div>
                 </div>
 
-                <!-- Scanner Results Table -->
-                <div class="card">
-                    <h3><i class="fas fa-table"></i> Scanner Results</h3>
-                    <div class="table-responsive">
-                        <table class="data-table" id="scannerTable">
-                            <thead>
-                                <tr>
-                                    <th>Symbol</th>
-                                    <th>Strike</th>
-                                    <th>Type</th>
-                                    <th>Exp</th>
-                                    <th>Bid/Ask</th>
-                                    <th>IV</th>
-                                    <th>Delta</th>
-                                    <th>Volume</th>
-                                    <th>OI</th>
-                                    <th>Signal</th>
-                                    <th>Score</th>
-                                </tr>
-                            </thead>
-                            <tbody id="scannerResults">
-                                <tr><td colspan="11" class="loading">Run scanner to see results</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="scan-actions">
+                    <button onclick="runScan()" class="btn-scan">🔎 Scan for Opportunities</button>
+                    <button onclick="resetFilters()" class="btn-reset">↺ Reset Filters</button>
                 </div>
-            </div>
+            </section>
 
-            <!-- Signals Tab -->
-            <div id="signals" class="tab-content">
-                <div class="trading-header">
-                    <div>
-                        <h1 class="trading-title">Trading Signals</h1>
-                        <p class="trading-subtitle">Institutional-grade algorithmic trading signals</p>
-                    </div>
-                    <button id="refreshSignalsBtn" class="button button-primary">
-                        <i class="fas fa-sync-alt"></i> Refresh Signals
-                    </button>
-                </div>
-
-                <!-- Signal Categories -->
-                <div class="signals-grid">
-                    <!-- Unusual Activity -->
-                    <div class="card signal-card">
-                        <h3><i class="fas fa-fire"></i> Unusual Options Activity</h3>
-                        <div class="signal-list" id="unusualActivity">
-                            <div class="loading">Loading signals...</div>
-                        </div>
-                    </div>
-
-                    <!-- Volatility Signals -->
-                    <div class="card signal-card">
-                        <h3><i class="fas fa-bolt"></i> Volatility Signals</h3>
-                        <div class="signal-list" id="volatilitySignals">
-                            <div class="loading">Loading signals...</div>
-                        </div>
-                    </div>
-
-                    <!-- Earnings Plays -->
-                    <div class="card signal-card">
-                        <h3><i class="fas fa-calendar-alt"></i> Earnings Plays</h3>
-                        <div class="signal-list" id="earningsPlays">
-                            <div class="loading">Loading signals...</div>
-                        </div>
-                    </div>
-
-                    <!-- Technical Signals -->
-                    <div class="card signal-card">
-                        <h3><i class="fas fa-chart-bar"></i> Technical Signals</h3>
-                        <div class="signal-list" id="technicalSignals">
-                            <div class="loading">Loading signals...</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Detailed Signals Table -->
-                <div class="card">
-                    <h3><i class="fas fa-list"></i> All Signals</h3>
-                    <div class="table-responsive">
-                        <table class="data-table" id="signalsTable">
-                            <thead>
-                                <tr>
-                                    <th>Time</th>
-                                    <th>Symbol</th>
-                                    <th>Signal Type</th>
-                                    <th>Description</th>
-                                    <th>Strength</th>
-                                    <th>Action</th>
-                                    <th>Target</th>
-                                </tr>
-                            </thead>
-                            <tbody id="signalsResults">
-                                <tr><td colspan="7" class="loading">Loading signals...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Greeks Tab -->
-            <div id="greeks" class="tab-content">
-                <div class="trading-header">
-                    <div>
-                        <h1 class="trading-title">Greeks Analysis</h1>
-                        <p class="trading-subtitle">Advanced Greeks calculations and risk metrics</p>
-                    </div>
-                </div>
-
-                <!-- Greeks Dashboard -->
-                <div class="metrics-grid">
-                    <div class="metric-card">
-                        <div class="metric-icon delta"><i class="fas fa-arrow-trend-up"></i></div>
-                        <div class="metric-info">
-                            <h4>High Delta Plays</h4>
-                            <div class="metric-value" id="deltaCount">0</div>
-                            <div class="metric-label">Opportunities</div>
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon gamma"><i class="fas fa-rocket"></i></div>
-                        <div class="metric-info">
-                            <h4>Gamma Squeeze Potential</h4>
-                            <div class="metric-value" id="gammaCount">0</div>
-                            <div class="metric-label">High Risk Stocks</div>
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon theta"><i class="fas fa-clock"></i></div>
-                        <div class="metric-info">
-                            <h4>Theta Decay Plays</h4>
-                            <div class="metric-value" id="thetaCount">0</div>
-                            <div class="metric-label">Premium Sellers</div>
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon vega"><i class="fas fa-wind"></i></div>
-                        <div class="metric-info">
-                            <h4>Vega Opportunities</h4>
-                            <div class="metric-value" id="vegaCount">0</div>
-                            <div class="metric-label">IV Plays</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Greeks Analysis Table -->
-                <div class="card">
-                    <h3><i class="fas fa-table"></i> Greeks-Based Opportunities</h3>
-                    <div class="table-responsive">
-                        <table class="data-table" id="greeksTable">
-                            <thead>
-                                <tr>
-                                    <th>Symbol</th>
-                                    <th>Strike</th>
-                                    <th>Type</th>
-                                    <th>Delta</th>
-                                    <th>Gamma</th>
-                                    <th>Theta</th>
-                                    <th>Vega</th>
-                                    <th>Strategy</th>
-                                    <th>Risk/Reward</th>
-                                </tr>
-                            </thead>
-                            <tbody id="greeksResults">
-                                <tr><td colspan="9" class="loading">Loading Greeks analysis...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Strategies Tab -->
-            <div id="strategies" class="tab-content">
-                <div class="trading-header">
-                    <div>
-                        <h1 class="trading-title">Options Strategies</h1>
-                        <p class="trading-subtitle">Pre-built strategies for every market condition</p>
-                    </div>
-                </div>
-
-                <!-- Strategy Cards -->
-                <div class="strategies-grid">
-                    <div class="card strategy-card">
-                        <h3><i class="fas fa-shield-alt"></i> Credit Spreads</h3>
-                        <p>High probability income generation</p>
-                        <div class="strategy-stats">
-                            <div class="stat">
-                                <span class="label">Win Rate:</span>
-                                <span class="value">65-75%</span>
-                            </div>
-                            <div class="stat">
-                                <span class="label">Best When:</span>
-                                <span class="value">Sideways/Slight Trend</span>
-                            </div>
-                        </div>
-                        <button class="btn btn-secondary" onclick="showStrategy('credit-spread')">
-                            View Opportunities
-                        </button>
-                    </div>
-
-                    <div class="card strategy-card">
-                        <h3><i class="fas fa-bullseye"></i> Iron Condors</h3>
-                        <p>Range-bound profit strategy</p>
-                        <div class="strategy-stats">
-                            <div class="stat">
-                                <span class="label">Win Rate:</span>
-                                <span class="value">60-70%</span>
-                            </div>
-                            <div class="stat">
-                                <span class="label">Best When:</span>
-                                <span class="value">Low Volatility</span>
-                            </div>
-                        </div>
-                        <button class="btn btn-secondary" onclick="showStrategy('iron-condor')">
-                            View Opportunities
-                        </button>
-                    </div>
-
-                    <div class="card strategy-card">
-                        <h3><i class="fas fa-fire"></i> Straddles</h3>
-                        <p>Profit from big moves (any direction)</p>
-                        <div class="strategy-stats">
-                            <div class="stat">
-                                <span class="label">Win Rate:</span>
-                                <span class="value">40-50%</span>
-                            </div>
-                            <div class="stat">
-                                <span class="label">Best When:</span>
-                                <span class="value">Earnings/Events</span>
-                            </div>
-                        </div>
-                        <button class="btn btn-secondary" onclick="showStrategy('straddle')">
-                            View Opportunities
-                        </button>
-                    </div>
-
-                    <div class="card strategy-card">
-                        <h3><i class="fas fa-calendar"></i> Calendar Spreads</h3>
-                        <p>Profit from time decay differences</p>
-                        <div class="strategy-stats">
-                            <div class="stat">
-                                <span class="label">Win Rate:</span>
-                                <span class="value">55-65%</span>
-                            </div>
-                            <div class="stat">
-                                <span class="label">Best When:</span>
-                                <span class="value">Neutral Outlook</span>
-                            </div>
-                        </div>
-                        <button class="btn btn-secondary" onclick="showStrategy('calendar-spread')">
-                            View Opportunities
-                        </button>
-                    </div>
-
-                    <div class="card strategy-card">
-                        <h3><i class="fas fa-arrow-up"></i> Debit Spreads</h3>
-                        <p>Defined risk directional plays</p>
-                        <div class="strategy-stats">
-                            <div class="stat">
-                                <span class="label">Win Rate:</span>
-                                <span class="value">50-60%</span>
-                            </div>
-                            <div class="stat">
-                                <span class="label">Best When:</span>
-                                <span class="value">Strong Trend</span>
-                            </div>
-                        </div>
-                        <button class="btn btn-secondary" onclick="showStrategy('debit-spread')">
-                            View Opportunities
-                        </button>
-                    </div>
-
-                    <div class="card strategy-card">
-                        <h3><i class="fas fa-butterfly"></i> Butterflies</h3>
-                        <p>Precise price target bets</p>
-                        <div class="strategy-stats">
-                            <div class="stat">
-                                <span class="label">Win Rate:</span>
-                                <span class="value">45-55%</span>
-                            </div>
-                            <div class="stat">
-                                <span class="label">Best When:</span>
-                                <span class="value">Low IV + Target</span>
-                            </div>
-                        </div>
-                        <button class="btn btn-secondary" onclick="showStrategy('butterfly')">
-                            View Opportunities
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Strategy Results -->
-                <div class="card" id="strategyResults" style="display: none;">
-                    <h3 id="strategyTitle"><i class="fas fa-list"></i> Strategy Opportunities</h3>
-                    <div class="table-responsive">
-                        <table class="data-table" id="strategyTable">
-                            <thead>
-                                <tr>
-                                    <th>Symbol</th>
-                                    <th>Strategy</th>
-                                    <th>Strikes</th>
-                                    <th>Max Profit</th>
-                                    <th>Max Loss</th>
-                                    <th>POP</th>
-                                    <th>DTE</th>
-                                    <th>Score</th>
-                                </tr>
-                            </thead>
-                            <tbody id="strategyTableBody">
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Flow Tab -->
-            <div id="flow" class="tab-content">
-                <div class="trading-header">
-                    <div>
-                        <h1 class="trading-title">Options Flow</h1>
-                        <p class="trading-subtitle">Track institutional money flow and smart money activity</p>
-                    </div>
-                </div>
-
-                <!-- Flow Metrics -->
-                <div class="metrics-grid">
-                    <div class="metric-card">
-                        <div class="metric-icon bullish"><i class="fas fa-arrow-trend-up"></i></div>
-                        <div class="metric-info">
-                            <h4>Bullish Flow</h4>
-                            <div class="metric-value" id="bullishFlow">$0</div>
-                            <div class="metric-label">Premium Spent</div>
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon bearish"><i class="fas fa-arrow-trend-down"></i></div>
-                        <div class="metric-info">
-                            <h4>Bearish Flow</h4>
-                            <div class="metric-value" id="bearishFlow">$0</div>
-                            <div class="metric-label">Premium Spent</div>
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon whale"><i class="fas fa-fish"></i></div>
-                        <div class="metric-info">
-                            <h4>Whale Trades</h4>
-                            <div class="metric-value" id="whaleCount">0</div>
-                            <div class="metric-label">Today</div>
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon sweep"><i class="fas fa-bolt"></i></div>
-                        <div class="metric-info">
-                            <h4>Sweep Orders</h4>
-                            <div class="metric-value" id="sweepCount">0</div>
-                            <div class="metric-label">Today</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Flow Table -->
-                <div class="card">
-                    <h3><i class="fas fa-stream"></i> Live Options Flow</h3>
-                    <div class="table-responsive">
-                        <table class="data-table" id="flowTable">
-                            <thead>
-                                <tr>
-                                    <th>Time</th>
-                                    <th>Symbol</th>
-                                    <th>Type</th>
-                                    <th>Strike</th>
-                                    <th>Exp</th>
-                                    <th>Premium</th>
-                                    <th>Size</th>
-                                    <th>Sentiment</th>
-                                    <th>Category</th>
-                                </tr>
-                            </thead>
-                            <tbody id="flowResults">
-                                <tr><td colspan="9" class="loading">Loading flow data...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Put/Call Ratio Chart -->
-                <div class="card">
-                    <h3><i class="fas fa-chart-line"></i> Put/Call Ratio Trend</h3>
-                    <canvas id="putCallChart" style="height: 300px;"></canvas>
-                </div>
-            </div>
-
-            <!-- Portfolio Tab -->
-            <div id="portfolio" class="tab-content">
-                <div class="trading-header">
-                    <div>
-                        <h1 class="trading-title">Portfolio Tracker</h1>
-                        <p class="trading-subtitle">Track your options positions and performance</p>
-                    </div>
-                </div>
-
-                <!-- Portfolio Summary -->
-                <div class="metrics-grid">
-                    <div class="metric-card">
-                        <div class="metric-icon profit"><i class="fas fa-dollar-sign"></i></div>
-                        <div class="metric-info">
-                            <h4>Total P&L</h4>
-                            <div class="metric-value" id="totalPL">$0.00</div>
-                            <div class="metric-label" id="plPercent">0.00%</div>
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-list"></i></div>
-                        <div class="metric-info">
-                            <h4>Open Positions</h4>
-                            <div class="metric-value" id="openPositions">0</div>
-                            <div class="metric-label">Active Trades</div>
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-chart-pie"></i></div>
-                        <div class="metric-info">
-                            <h4>Win Rate</h4>
-                            <div class="metric-value" id="winRate">0%</div>
-                            <div class="metric-label">Closed Trades</div>
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-exclamation-triangle"></i></div>
-                        <div class="metric-info">
-                            <h4>Total Risk</h4>
-                            <div class="metric-value" id="totalRisk">$0</div>
-                            <div class="metric-label">Max Loss</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Add Position Form -->
-                <div class="card">
-                    <h3><i class="fas fa-plus"></i> Add Position</h3>
-                    <div class="position-form">
-                        <div class="form-grid">
-                            <input type="text" id="posSymbol" placeholder="Symbol (e.g., AAPL)">
-                            <select id="posType">
-                                <option value="call">Call</option>
-                                <option value="put">Put</option>
-                            </select>
-                            <input type="number" id="posStrike" placeholder="Strike Price">
-                            <input type="date" id="posExpiration">
-                            <input type="number" id="posQuantity" placeholder="Contracts" value="1">
-                            <input type="number" id="posPremium" placeholder="Premium Paid" step="0.01">
-                        </div>
-                        <button class="btn btn-primary" onclick="addPosition()">
-                            <i class="fas fa-plus"></i> Add Position
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Positions Table -->
-                <div class="card">
-                    <h3><i class="fas fa-table"></i> Your Positions</h3>
-                    <div class="table-responsive">
-                        <table class="data-table" id="portfolioTable">
-                            <thead>
-                                <tr>
-                                    <th>Symbol</th>
-                                    <th>Type</th>
-                                    <th>Strike</th>
-                                    <th>Exp</th>
-                                    <th>Qty</th>
-                                    <th>Entry</th>
-                                    <th>Current</th>
-                                    <th>P&L</th>
-                                    <th>P&L %</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="portfolioResults">
-                                <tr><td colspan="10" class="empty-state">No positions. Add your first trade above!</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Dividend Screener Tab -->
-            <div id="dividend-screener" class="tab-content">
-                <div class="trading-header">
-                    <div>
-                        <h1 class="trading-title">Dividend Stock Screener</h1>
-                        <p class="trading-subtitle">Find quality dividend stocks using systematic value criteria</p>
-                    </div>
-                    <button class="btn btn-primary" onclick="dividendScreener.exportToCSV()">
-                        <i class="fas fa-download"></i> Export Results
-                    </button>
-                </div>
-
-                <!-- Screening Criteria Summary -->
-                <div class="kpi-dashboard">
-                    <div class="kpi-card-primary">
-                        <div class="kpi-label">Total Stocks</div>
-                        <div class="kpi-value" id="totalStocks">0</div>
-                        <div class="kpi-change neutral">Database</div>
-                    </div>
-                    <div class="kpi-card-primary">
-                        <div class="kpi-label">Passing Filters</div>
-                        <div class="kpi-value" id="passingStocks">0</div>
-                        <div class="kpi-change positive" id="passingPercent">0%</div>
-                    </div>
-                    <div class="kpi-card-primary">
-                        <div class="kpi-label">Avg Rating</div>
-                        <div class="kpi-value" id="avgRating">0.0</div>
-                        <div class="kpi-change neutral">Out of 10</div>
-                    </div>
-                    <div class="kpi-card-primary">
-                        <div class="kpi-label">Avg Yield</div>
-                        <div class="kpi-value" id="avgYield">0%</div>
-                        <div class="kpi-change neutral">Annual</div>
-                    </div>
-                </div>
-
-                <!-- Screening Criteria Filters -->
-                <div class="card">
-                    <h3><i class="fas fa-filter"></i> Screening Criteria</h3>
-                    <p class="card-subtitle">Adjust filters to find stocks matching your criteria</p>
-                    
-                    <div class="screener-filters">
-                        <div class="filter-group">
-                            <label>
-                                <i class="fas fa-chart-line"></i> P/E Ratio (Max)
-                                <input type="number" id="filterPE" value="15" step="0.1" onchange="dividendScreener.applyFilters()">
-                            </label>
-                            <label>
-                                <i class="fas fa-percentage"></i> Dividend Yield (Min %)
-                                <input type="number" id="filterYield" value="4" step="0.1" onchange="dividendScreener.applyFilters()">
-                            </label>
-                            <label>
-                                <i class="fas fa-trophy"></i> ROE (Min %)
-                                <input type="number" id="filterROE" value="15" step="0.1" onchange="dividendScreener.applyFilters()">
-                            </label>
-                            <label>
-                                <i class="fas fa-shield-alt"></i> Dividend Coverage (Min)
-                                <input type="number" id="filterCoverage" value="1.0" step="0.1" onchange="dividendScreener.applyFilters()">
-                            </label>
-                        </div>
-                        <div class="filter-group">
-                            <label>
-                                <i class="fas fa-balance-scale"></i> Debt/Equity (Max)
-                                <input type="number" id="filterDebt" value="1.5" step="0.1" onchange="dividendScreener.applyFilters()">
-                            </label>
-                            <label>
-                                <i class="fas fa-coins"></i> Operating Margin (Min %)
-                                <input type="number" id="filterMargin" value="15" step="0.1" onchange="dividendScreener.applyFilters()">
-                            </label>
-                            <label>
-                                <i class="fas fa-building"></i> Market Cap (Min $B)
-                                <input type="number" id="filterMarketCap" value="1" step="0.1" onchange="dividendScreener.applyFilters()">
-                            </label>
-                            <label>
-                                <i class="fas fa-chart-bar"></i> Sales Growth (Min %)
-                                <input type="number" id="filterSalesGrowth" value="-5" step="0.1" onchange="dividendScreener.applyFilters()">
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="button-group" style="margin-top: 20px;">
-                        <button class="btn btn-secondary" onclick="dividendScreener.resetFilters()">
-                            <i class="fas fa-undo"></i> Reset to Default
-                        </button>
-                        <button class="btn btn-primary" onclick="dividendScreener.applyFilters()">
-                            <i class="fas fa-search"></i> Apply Filters
-                        </button>
-                    </div>
+            <!-- Results Section -->
+            <section class="results-section" id="resultsSection" style="display: none;">
+                <div class="results-header">
+                    <h2>📊 Top Opportunities</h2>
+                    <div class="results-stats" id="resultsStats"></div>
                 </div>
 
                 <!-- Results Table -->
-                <div class="card">
-                    <h3><i class="fas fa-table"></i> Screening Results</h3>
-                    <p class="card-subtitle">Click column headers to sort</p>
-                    
-                    <div class="table-container">
-                        <table class="data-table" id="screenerResultsTable">
-                            <thead>
-                                <tr>
-                                    <th onclick="dividendScreener.sortBy('ticker')">Ticker <i class="fas fa-sort"></i></th>
-                                    <th onclick="dividendScreener.sortBy('company')">Company <i class="fas fa-sort"></i></th>
-                                    <th onclick="dividendScreener.sortBy('price')">Price <i class="fas fa-sort"></i></th>
-                                    <th onclick="dividendScreener.sortBy('yield')">Yield % <i class="fas fa-sort"></i></th>
-                                    <th onclick="dividendScreener.sortBy('pe')">P/E <i class="fas fa-sort"></i></th>
-                                    <th onclick="dividendScreener.sortBy('roe')">ROE % <i class="fas fa-sort"></i></th>
-                                    <th onclick="dividendScreener.sortBy('coverage')">Coverage <i class="fas fa-sort"></i></th>
-                                    <th onclick="dividendScreener.sortBy('debtEquity')">Debt/Eq <i class="fas fa-sort"></i></th>
-                                    <th onclick="dividendScreener.sortBy('margin')">Margin % <i class="fas fa-sort"></i></th>
-                                    <th onclick="dividendScreener.sortBy('marketCap')">Mkt Cap $B <i class="fas fa-sort"></i></th>
-                                    <th onclick="dividendScreener.sortBy('rating')">Rating <i class="fas fa-sort"></i></th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="screenerResultsBody">
-                                <tr>
-                                    <td colspan="12" style="text-align: center; padding: 40px;">
-                                        <i class="fas fa-spinner fa-spin" style="font-size: 24px; color: #666;"></i>
-                                        <p style="margin-top: 10px; color: #666;">Loading stock database...</p>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="table-container">
+                    <table class="results-table" id="resultsTable">
+                        <thead>
+                            <tr>
+                                <th onclick="sortBy('score')">Score ⬍</th>
+                                <th onclick="sortBy('ticker')">Ticker ⬍</th>
+                                <th onclick="sortBy('price')">Stock Price ⬍</th>
+                                <th onclick="sortBy('strike')">Strike ⬍</th>
+                                <th onclick="sortBy('expiration')">Expiration ⬍</th>
+                                <th onclick="sortBy('premium')">Premium ⬍</th>
+                                <th onclick="sortBy('delta')">Delta ⬍</th>
+                                <th onclick="sortBy('iv')">IV % ⬍</th>
+                                <th onclick="sortBy('ivRank')">IV Rank ⬍</th>
+                                <th onclick="sortBy('breakeven')">Break-even ⬍</th>
+                                <th onclick="sortBy('probability')">Win % ⬍</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsBody">
+                        </tbody>
+                    </table>
                 </div>
+            </section>
 
-                <!-- Screening Methodology -->
-                <div class="card">
-                    <h3><i class="fas fa-book"></i> Screening Methodology</h3>
-                    <div class="methodology-grid">
-                        <div class="methodology-item">
-                            <h4>Primary Filters (Core Criteria)</h4>
-                            <ul>
-                                <li><strong>P/E < 15x:</strong> Avoids overvalued stocks</li>
-                                <li><strong>Dividend Yield > 4%:</strong> Targets income generation</li>
-                                <li><strong>10+ Year Dividend Growth:</strong> Ensures stability</li>
-                                <li><strong>ROE > 15%:</strong> Confirms profitability</li>
-                            </ul>
-                        </div>
-                        <div class="methodology-item">
-                            <h4>Quality Filters (Risk Management)</h4>
-                            <ul>
-                                <li><strong>Dividend Coverage > 1.0x:</strong> Sustainable payouts</li>
-                                <li><strong>Debt/Equity < 1.5x:</strong> Conservative leverage</li>
-                                <li><strong>Operating Margin > 15%:</strong> Operational efficiency</li>
-                                <li><strong>Market Cap > $1B:</strong> Liquidity & stability</li>
-                            </ul>
-                        </div>
-                        <div class="methodology-item">
-                            <h4>Red Flag Filters (Downside Protection)</h4>
-                            <ul>
-                                <li><strong>Sales Growth > -5%:</strong> Avoid declining businesses</li>
-                                <li><strong>Price near 52-week low:</strong> Value entry points</li>
-                            </ul>
-                        </div>
-                        <div class="methodology-item">
-                            <h4>Rating System (1-10 Scale)</h4>
-                            <ul>
-                                <li><strong>9-10:</strong> Strong Buy - Elite quality</li>
-                                <li><strong>7-8:</strong> Buy - Good fundamentals</li>
-                                <li><strong>5-6:</strong> Hold - Mixed signals</li>
-                                <li><strong>1-4:</strong> Avoid - Failed criteria</li>
-                            </ul>
-                        </div>
-                    </div>
+            <!-- Detailed Analysis Modal -->
+            <div id="analysisModal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <span class="close" onclick="closeModal()">&times;</span>
+                    <div id="analysisContent"></div>
                 </div>
             </div>
 
         </div>
-    </main>
+    </div>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="disclaimer">
-                    <h4><i class="fas fa-exclamation-triangle"></i> Important Disclaimer</h4>
-                    <p><strong>This platform is for educational and informational purposes only.</strong> Options trading involves substantial risk and is not suitable for all investors. Past performance does not guarantee future results. This is not financial advice. Always consult with a licensed financial advisor before making investment decisions. The creators of this platform are not responsible for any financial losses.</p>
-                </div>
-                <div class="footer-links">
-                    <p>&copy; 2026 Options Intelligence Platform | 
-                        <a href="#" onclick="showDisclaimer()">Full Disclaimer</a> | 
-                        <a href="#" onclick="showAbout()">About</a>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="js/expanded-stocks.js"></script>
-    <script src="js/realtime-data.js"></script>
-    <script src="js/data.js"></script>
-    <script src="js/calculations.js"></script>
-    <script src="js/signals.js"></script>
-    <script src="js/scanner.js"></script>
-    <script src="js/hotpicks.js"></script>
-    <script src="js/ticker-analyzer.js"></script>
-    <script src="js/portfolio.js"></script>
-    <script src="js/dividend-screener.js"></script>
-    
-    <!-- NEW: Real Trading System (V7.0.8) -->
-    <script src="js/massive-historical-data.js"></script>
-    <script src="js/iv-rank-engine.js"></script>
-    <script src="js/backtest-engine.js"></script>
-    
-    <!-- Institutional-Grade Intelligence Modules -->
-    <!-- TEMPORARILY DISABLED V7.0.8: These modules have circular dependencies causing stack overflow -->
-    <!-- Will be fixed and re-enabled in V7.0.9 -->
-    <!--
-    <script src="js/event-intelligence.js"></script>
-    <script src="js/news-sentiment-engine.js"></script>
-    <script src="js/supply-chain-intelligence.js"></script>
-    <script src="js/cross-asset-intelligence.js"></script>
-    <script src="js/macro-intelligence.js"></script>
-    <script src="js/technical-confluence.js"></script>
-    <script src="js/master-intelligence.js"></script>
-    -->
-    
-    <!-- NEW: Corporate Calendar & Intelligent Screening -->
-    <!-- TEMPORARILY DISABLED V7.0.8: Stack overflow issues -->
-    <!--
-    <script src="js/corporate-calendar.js"></script>
-    <script src="js/intelligent-screener.js"></script>
-    -->
-    
-    <script src="js/enhanced-hotpicks.js"></script>
-    <!-- DISABLED for V7 - Old UI components that create duplicate sections -->
-    <!-- <script src="js/enhanced-hotpicks-ui.js"></script> -->
-    <!-- <script src="js/demo-interface.js"></script> -->
-    
-    <!-- V7 UI Adapter -->
-    <script src="js/v7-hotpicks-adapter.js"></script>
-    
-    <script src="js/main.js"></script>
-    <!-- DISABLED for V7 - Old Hot Picks UI component -->
-    <!-- <script src="js/hotpicks-ui.js"></script> -->
-    
-    <!-- V7 Navigation Handler -->
-    <script>
-        // Navigation Tab Switching
-        document.addEventListener('DOMContentLoaded', function() {
-            const navItems = document.querySelectorAll('.nav-item');
-            const tabContents = document.querySelectorAll('.tab-content');
-            
-            navItems.forEach(item => {
-                item.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    // Remove active class from all nav items
-                    navItems.forEach(nav => nav.classList.remove('active'));
-                    
-                    // Add active class to clicked item
-                    this.classList.add('active');
-                    
-                    // Hide all tab contents
-                    tabContents.forEach(content => content.classList.remove('active'));
-                    
-                    // Show the corresponding tab content
-                    const tabId = this.getAttribute('data-tab');
-                    const targetTab = document.getElementById(tabId);
-                    if (targetTab) {
-                        targetTab.classList.add('active');
-                    }
-                });
-            });
-            
-            // Timeframe selector
-            document.querySelectorAll('.timeframe-option').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.timeframe-option').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                });
-            });
-            
-            // Chart period selector
-            document.querySelectorAll('.segment').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.segment').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                });
-            });
-        });
-    </script>
+    <script src="js/options-intelligence.js"></script>
 </body>
 </html>
